@@ -1,7 +1,9 @@
 package org.containershipPb;
 
+import org.chocosolver.solver.variables.IntVar;
+
 public class PosPanneau extends Position{
-    public PosPanneau(int noBay, int noBloc, Data data) {
-        super(noBay, noBloc, null, null, data);
+    public PosPanneau(IntVar intVar) {
+        super(intVar);
     }
 }
