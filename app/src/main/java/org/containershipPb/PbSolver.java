@@ -9,5 +9,8 @@ public class PbSolver {
         Variables variables = new Variables(model, data);
         Contraintes contraintes = new Contraintes(data, model, variables);
         contraintes.postContraints();
+
+        model.getSolver().findSolution();
+        model.getSolver().showSolutions();
     }
 }

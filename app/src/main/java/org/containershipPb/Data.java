@@ -38,6 +38,18 @@ public class Data {
 
     public int unload(int c){return planification[c][1];}
 
+    public int nbLoad(int i){
+        int n = 0;
+        for (int c = 0; c < nbCont; c++) if (load(c) == i) n++;
+        return n;
+    }
+
+    public int nbUnload(int i){
+        int n = 0;
+        for (int c = 0; c < nbCont; c++) if (unload(c) == i) n++;
+        return n;
+    }
+
     public Integer blocked(int p){
         if (supportless.contains(p) && hold.contains(p)) return null;
         if (supportless.contains(p) && !hold.contains(p)) return pan(p).numero;
