@@ -16,11 +16,11 @@ public class Contraintes {
     }
 
     public void postContraints(){
+        restowTot();
         for (int i = 0; i < data.nbStop; i++) {
-            IntVar I = model.intVar(i);
             DifferentPositions(i);
+            restow(i);
             for (int c = 0; c < data.nbCont; c++) {
-                TransportEveryCont(c, i, I);
                 for (int p = 0; p < data.nbPos; p++) {
                     positionContainerConstraint(p, c, i);
                     pile(p, i);
@@ -43,15 +43,6 @@ public class Contraintes {
             vars[c] = posI[c].intVar;
         }
         model.allDifferent(vars).post();
-    }
-    private void TransportEveryCont(int c, int i, IntVar I){
-        model.ifOnlyIf(
-                model.arithm(vars.position[c][i].intVar, "!=", null),
-                model.and(
-                        model.arithm(I, ">", data.load(c)),
-                        model.arithm(I, "<=", data.unload(c))
-                )
-        );
     }
     private void pile(int p, int i){
         if (!data.supportless.contains(p)) {
@@ -114,5 +105,13 @@ public class Contraintes {
                     model.arithm(vars.move[data.pan(p).numero][i], "!=", 2)
             );
         }
+    }
+    private void restow(int i){
+        model.sum(ArrayUtils.getColumn(vars.move, i),
+                "=",
+                vars.restow[i].add(data.nbUnload(i)).add(data.nbLoad(i)).intVar()).post();
+    }
+    private void restowTot(){
+        model.sum(vars.restow, "=", vars.restowTot).post();
     }
 }
