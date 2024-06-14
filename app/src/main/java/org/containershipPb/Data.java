@@ -12,7 +12,7 @@ public class Data {
     public Data(int nbCont, int nbStop, int nbBaies, int nbBlocs, int nbPiles, int hMax){
         this.nbCont = nbCont;
         this.nbPos = nbBaies * nbBlocs * nbPiles * hMax;
-        this.nbPosPan = nbPos + nbBlocs;
+        this.nbPosPan = nbPos + nbBlocs * nbBaies;
         this.nbStop = nbStop;
         this.nbBaies = nbBaies;
         this.nbBlocs = nbBlocs;
@@ -75,8 +75,8 @@ public class Data {
     }
 
     private Panneau[] generatePanList() {
-        Panneau[] t = new Panneau[nbBlocs];
-        for (int b = 0; b < nbBlocs; b++) {
+        Panneau[] t = new Panneau[nbBlocs * nbBaies];
+        for (int b = 0; b < nbBlocs * nbBaies; b++) {
             t[b] = new Panneau(nbPos + b);
         }
         return t;

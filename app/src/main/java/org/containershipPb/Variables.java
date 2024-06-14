@@ -34,7 +34,7 @@ public class Variables {
         container = new Container[data.nbPosPan][data.nbStop];
         for (int i = 0; i < data.nbStop; i++) {
             for (int p = 0; p < data.nbPosPan; p++) {
-                container[p][i] = new Container(model.intVar("container_"+p+"_"+i, 0, data.nbCont));
+                container[p][i] = new Container(model.intVar("container_"+p+"_"+i, -1, data.nbCont));
             }
         }
     }

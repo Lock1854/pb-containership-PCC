@@ -10,7 +10,8 @@ public class PbSolver {
         Contraintes contraintes = new Contraintes(data, model, variables);
         contraintes.postContraints();
 
+
+        model.getSolver().showStatistics();
         model.getSolver().findOptimalSolution(variables.restowTot, false);
-        model.getSolver().showSolutions();
     }
 }
