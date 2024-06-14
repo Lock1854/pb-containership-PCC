@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Data {
-    final int nbCont, nbStop, nbPos;
+    final int nbCont, nbStop, nbPos, nbPosPan;
     private final int nbBaies, nbBlocs, nbPiles, hMax;
     private final int[][] planification;
     final Set<Integer> supportless, hold;
@@ -12,6 +12,7 @@ public class Data {
     public Data(int nbCont, int nbStop, int nbBaies, int nbBlocs, int nbPiles, int hMax){
         this.nbCont = nbCont;
         this.nbPos = nbBaies * nbBlocs * nbPiles * hMax;
+        this.nbPosPan = nbPos + nbBlocs;
         this.nbStop = nbStop;
         this.nbBaies = nbBaies;
         this.nbBlocs = nbBlocs;

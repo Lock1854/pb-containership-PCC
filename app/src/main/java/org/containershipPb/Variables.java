@@ -12,8 +12,24 @@ public class Variables {
     public Variables(Model model, Data data){
         this.model = model;
         this.data = data;
+        generatePosition();
+        generateContainer();
+        move = model.intVarMatrix("move", data.nbPosPan, data.nbStop, 0, 2, false);
+    }
+    private void generatePosition(){
         position = new Position[data.nbCont][data.nbStop];
-        container = new Container[data.nbPos][data.nbStop];
-        move = model.intVarMatrix("move", data.nbPos, data.nbStop, 0, 2, false);
+        for (int i = 0; i < data.nbStop; i++) {
+            for (int c = 0; c < data.nbCont; c++) {
+                position[c][i] = new Position(model.intVar("position_"+c+"_"+i, 0, data.nbPosPan));
+            }
+        }
+    }
+    private void generateContainer(){
+        container = new Container[data.nbPosPan][data.nbStop];
+        for (int i = 0; i < data.nbStop; i++) {
+            for (int p = 0; p < data.nbPosPan; p++) {
+                container[p][i] = new Container(model.intVar("container_"+p+"_"+i, 0, data.nbCont));
+            }
+        }
     }
 }

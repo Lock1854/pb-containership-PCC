@@ -1,7 +1,6 @@
 package org.containershipPb;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.FixedIntVarImpl;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -25,7 +24,7 @@ public class Contraintes {
                 for (int p = 0; p < data.nbPos; p++) {
                     positionContainerConstraint(p, c, i);
                     pile(p, i);
-                    move(p, i);
+                    movePos(p, i);
                 }
             }
         }
@@ -62,7 +61,58 @@ public class Contraintes {
             );
         }
     }
-    private void move(int p, int i){
-        BoolVar bv = model.arithm(vars.container[p][i].intVar, "!=", vars.container[p+1][i].intVar).reify();
+    private void movePos(int p, int i){
+        model.ifThen(
+                model.and(
+                        model.arithm(vars.container[p][i].intVar, "!=", vars.container[p][i+1].intVar),
+                        model.or(
+                                model.arithm(vars.container[p][i].intVar, "=", null),
+                                model.arithm(vars.container[p][i+1].intVar, "=", null)
+                        )
+                ),
+                model.arithm(vars.move[p][i].intVar(), "=", 1)
+        );
+        model.ifThen(
+                model.and(
+                        model.arithm(vars.container[p][i].intVar, "!=", vars.container[p][i+1].intVar),
+                        model.and(
+                                model.arithm(vars.container[p][i].intVar, "!=", null),
+                                model.arithm(vars.container[p][i+1].intVar, "!=", null)
+                        )
+                ),
+                model.arithm(vars.move[p][i].intVar(), "=", 2)
+        );
+
+        if (data.supportless.contains(p) && data.hold.contains(p)){
+            model.ifThen(
+                    model.arithm(vars.container[p][i].intVar, "=", vars.container[p][i+1].intVar),
+                    model.arithm(vars.move[p][i].intVar(), "=", 0)
+            );
+        } else if (data.supportless.contains(p) && !data.hold.contains(p)) {
+            model.ifThenElse(
+                    model.and(
+                            model.arithm(vars.container[p][i].intVar, "=", vars.container[p][i+1].intVar),
+                            model.arithm(vars.move[data.pan(p).numero][i], "!=", 0)
+                    ),
+                    model.arithm(vars.move[p][i].intVar(), "=", 2),
+                    model.arithm(vars.move[p][i].intVar(), "=", 0)
+            );
+        } else if (!data.supportless.contains(p)) {
+            model.ifThenElse(
+                    model.and(
+                            model.arithm(vars.container[p][i].intVar, "=", vars.container[p][i+1].intVar),
+                            model.arithm(vars.move[p-1][i], "!=", 0)
+                    ),
+                    model.arithm(vars.move[p][i].intVar(), "=", 2),
+                    model.arithm(vars.move[p][i].intVar(), "=", 0)
+            );
+        }
+
+        if (data.hold.contains(p)){
+            model.ifThen(
+                    model.arithm(vars.move[p][i], "!=", 0),
+                    model.arithm(vars.move[data.pan(p).numero][i], "!=", 2)
+            );
+        }
     }
 }
