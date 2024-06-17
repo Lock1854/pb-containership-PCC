@@ -25,16 +25,16 @@ public class Variables {
         for (int i = 0; i < data.nbStop; i++) {
             for (int c = 0; c < data.nbCont; c++) {
                 if (data.load(c) < i && data.unload(c) >= i) {
-                    position[c][i] = new Position(model.intVar("position_" + c + "_" + i, 0, data.nbPosPan));
+                    position[c][i] = new Position(model.intVar("position(" + c + ", " + i + ")", 0, data.nbPos - 1));
                 }
             }
         }
     }
     private void generateContainer(){
-        container = new Container[data.nbPosPan][data.nbStop];
+        container = new Container[data.nbPos][data.nbStop];
         for (int i = 0; i < data.nbStop; i++) {
-            for (int p = 0; p < data.nbPosPan; p++) {
-                container[p][i] = new Container(model.intVar("container_"+p+"_"+i, -1, data.nbCont));
+            for (int p = 0; p < data.nbPos; p++) {
+                container[p][i] = new Container(model.intVar("container(" + p + ", " + i + ")", -1, data.nbCont));
             }
         }
     }

@@ -6,7 +6,7 @@ import java.util.Set;
 public class Data {
     final int nbCont, nbStop, nbPos, nbPosPan;
     private final int nbBaies, nbBlocs, nbPiles, hMax;
-    private final int[][] planification;
+    final int[][] planification;
     final Set<Integer> supportless, hold;
     final Panneau[] panList;
     public Data(int nbCont, int nbStop, int nbBaies, int nbBlocs, int nbPiles, int hMax){
