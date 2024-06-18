@@ -4,8 +4,9 @@ import org.chocosolver.solver.variables.IntVar;
 
 public class Position {
     Position support;
-    IntVar intVar;
+    Boolean isPanneau;
+    int hauteur;
     public Position(IntVar intVar){
-        this.intVar = intVar;
+
     }
 }
