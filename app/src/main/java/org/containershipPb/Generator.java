@@ -4,6 +4,7 @@ import java.util.Random;
 
 public class Generator {
     int[][] planification;
+
     public Generator(int nbCont, int nbStop) {
         planification = new int[nbCont][2];
         Random random = new Random();

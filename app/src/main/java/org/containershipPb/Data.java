@@ -9,6 +9,7 @@ public class Data {
     final int[][] planification;
     final Set<Integer> supportless, hold;
     final Panneau[] panList;
+
     public Data(int nbCont, int nbStop, int nbBaies, int nbBlocs, int nbPiles, int hMax){
         this.nbCont = nbCont;
         this.nbPos = nbBaies * nbBlocs * nbPiles * hMax;
@@ -54,6 +55,14 @@ public class Data {
         if (supportless.contains(p) && hold.contains(p)) return null;
         if (supportless.contains(p) && !hold.contains(p)) return pan(p).numero;
         return p - 1;
+    }
+
+    public Set<Integer> transported(int i){
+        Set<Integer> s = new HashSet<Integer>();
+        for (int c = 0; c < nbCont; c++) {
+            if (i > load(c) && i <= unload(c)) s.add(c);
+        }
+        return s;
     }
 
     private Set<Integer> generateSupportless(){
