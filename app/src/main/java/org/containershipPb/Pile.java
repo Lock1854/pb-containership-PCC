@@ -9,4 +9,13 @@ public class Pile {
         this.posList = posList;
         hauteur = posList.size();
     }
+
+    public Position support(Position pos){
+        if (pos.hauteur == 0) return null;
+        else return posList.get(hauteur - 1);
+    }
+
+    public ArrayList<Position> bloquant(Position pos){
+
+    }
 }

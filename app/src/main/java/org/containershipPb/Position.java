@@ -4,7 +4,6 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.ArrayList;
 
 public class Position {
-    Position support;
     ArrayList<Position> bloquant;
     Boolean isPanneau;
     Integer hauteur;

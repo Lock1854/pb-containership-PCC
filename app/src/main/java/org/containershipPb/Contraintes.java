@@ -31,13 +31,13 @@ public class Contraintes {
 //            }
 //        }
 //    }
-//    private void positionContainerConstraint(int p, int c, int i){
-//        if (vars.position[c][i] != null) {
+//    private void positionContainerConstraint(Position pos, Container cont, int i){
+//        if (cont.positions[i] != null) {
 //            model.ifOnlyIf(
-//                    model.arithm(vars.position[c][i].intVar, "=", p),
-//                    model.arithm(vars.container[p][i].intVar, "=", c)
+//                    model.arithm(cont.positions[i], "=", pos.number),
+//                    model.arithm(pos.containers[i], "=", cont.number)
 //            );
-//        } else model.arithm(vars.container[p][i].intVar, "=", -1).post();
+//        } else model.arithm(pos.containers[i], "!=", cont.number).post();
 //    }
 //    private void DifferentPositions(int i){
 //        Position[] posI = ArrayUtils.getColumn(vars.position, i);
@@ -48,7 +48,7 @@ public class Contraintes {
 //        model.allDifferent(vars).post();
 //    }
 //
-//    private void pile(int p, int i){
+//    private void pile(Position pos, int i){
 //        if (!navire.supportless.contains(p)) {
 //            model.ifThen(
 //                    model.arithm(vars.container[p][i].intVar, "!=", -1),
