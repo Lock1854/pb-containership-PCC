@@ -3,12 +3,13 @@ package org.containershipPb;
 import java.util.ArrayList;
 
 public class Navire {
-    final int nbPos, nbBay;
+    final int nbPos, nbPosPan, nbBay;
     ArrayList<Bay> bayList;
     public Navire(ArrayList<Bay> bayList){
         this.bayList = bayList;
         nbBay = bayList.size();
         nbPos = computeNbPos();
+        nbPosPan = computeNbPosPan();
     }
     private int computeNbPos(){
         int n = 0;
@@ -18,6 +19,13 @@ public class Navire {
                     n = n + pile.hauteur;
                 }
             }
+        }
+        return n;
+    }
+    private int computeNbPosPan(){
+        int n = nbPos;
+        for (Bay bay : bayList){
+            n = n + bay.nbBloc;
         }
         return n;
     }

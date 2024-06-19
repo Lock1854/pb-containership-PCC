@@ -5,24 +5,27 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
 public class Contraintes {
-//    Navire navire;
-//    Model model;
-//    Variables vars;
-//    public Contraintes(Navire navire, Model model, Variables vars){
-//        this.navire = navire;
-//        this.model = model;
-//        this.vars = vars;
-//    }
-//
+    Navire navire;
+    Model model;
+    Variables vars;
+    int nbCont, nbStop;
+    public Contraintes(Navire navire, Model model, Variables vars, int nbStop, int nbCont){
+        this.navire = navire;
+        this.model = model;
+        this.vars = vars;
+        this.nbStop = nbStop;
+        this.nbCont = nbCont;
+    }
+
 //    public void postContraints(){
 //        restowTot();
-//        for (int i = 0; i < navire.nbStop; i++) {
+//        for (int i = 0; i < nbStop; i++) {
 //            DifferentPositions(i);
 //            restow(i);
 //            for (int p = 0; p < navire.nbPos; p++) {
 //                pile(p, i);
 //                movePos(p, i);
-//                for (int c = 0; c < navire.nbCont; c++) {
+//                for (int c = 0; c < nbCont; c++) {
 //                    positionContainerConstraint(p, c, i);
 //                }
 //            }
@@ -38,8 +41,8 @@ public class Contraintes {
 //    }
 //    private void DifferentPositions(int i){
 //        Position[] posI = ArrayUtils.getColumn(vars.position, i);
-//        IntVar[] vars = model.intVarArray(navire.nbCont, 0, navire.nbPosPan);
-//        for (int c = 0; c < navire.nbCont; c++) {
+//        IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPosPan);
+//        for (int c = 0; c < nbCont; c++) {
 //            if (posI[c] != null) vars[c] = posI[c].intVar;
 //        }
 //        model.allDifferent(vars).post();
@@ -54,7 +57,7 @@ public class Contraintes {
 //        }
 //    }
 //    private void movePos(int p, int i){
-//        if (i < navire.nbStop - 1) {
+//        if (i < nbStop - 1) {
 //            // cas cont(p,i) != cont(p,i+1)
 //            model.ifThen(
 //                    model.and(
