@@ -2,8 +2,6 @@ package org.containershipPb;
 
 import java.util.ArrayList;
 
-import static org.containershipPb.Navire.numberPos;
-
 public class Bay {
     int nbBloc;
     ArrayList<Bloc> blocList;

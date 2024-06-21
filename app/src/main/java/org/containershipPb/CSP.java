@@ -132,7 +132,7 @@ public class CSP {
     }
 
     // probably unecessary due to positionContainerEquiv, but maybe helpful ?
-    private void DifferentPositions(int i){
+    private void differentPositions(int i){
         IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPos);
         int compteur = 0;
         for (Container cont : data.transportedConts(i)) {
