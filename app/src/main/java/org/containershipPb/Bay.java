@@ -10,10 +10,9 @@ public class Bay {
 
     public Bay(int nbBloc, int nbPileAbove, int nbPilesUnder, int nbPosAbove, int nbPosUnder){
         this.nbBloc = nbBloc;
-        this.blocList = new ArrayList<Bloc>();
+        this.blocList = new ArrayList<>();
         for (int i = 0; i < nbBloc; i++) {
             this.blocList.add(new Bloc(nbPileAbove, nbPilesUnder, nbPosAbove, nbPosUnder, this));
-            numberPos++;
         }
     }
 }

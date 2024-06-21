@@ -18,11 +18,9 @@ public class Bloc {
         this.pileListUnder = new ArrayList<>();
         for (int i = 0; i < nbPilesUnder; i++) {
             this.pileListUnder.add(new Pile(nbPosUnder, this));
-            numberPos++;
         }
         for (int i = 0; i < nbPileAbove; i++) {
             this.pileListAbove.add(new Pile(nbPosAbove, this));
-            numberPos++;
         }
         this.panneau = new Position(null, numberPan, true, null, this);
         numberPan++;

@@ -1,6 +1,7 @@
 package org.containershipPb;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -24,18 +25,18 @@ public class CSP {
         this.navire = navire;
         this.data = data;
         move = model.intVarMatrix("move", navire.nbPosPan, nbStop, 0, 2, false);
-        restow = model.intVarArray("restow", nbStop, 0, navire.nbPos);
-        restowTot = model.intVar("restowTot", 0, nbCont);
+        restow = model.intVarArray("restow", nbStop, 0, navire.nbPosPan);
+        restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
         initialisePosVar();
         initialiseContVar();
     }
 
-    public void solve(Boolean restowAllowed) {
+    public void solve(Boolean restowAllowed, Boolean printSolution) {
         postContraints(restowAllowed);
         model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
-        if (restowAllowed) model.getSolver().findOptimalSolution(restowTot, false);
-        else model.getSolver().findSolution();
+        Solution solution = restowAllowed? model.getSolver().findOptimalSolution(restowTot, false)
+                : model.getSolver().findSolution();
+        if (printSolution) printSolution(solution);
     }
 
     public void postContraints(Boolean restowAllowed){
@@ -157,6 +158,44 @@ public class CSP {
                 if (i > cont.load && i <= cont.unload) {
                     cont.positions[i] = model.intVar("position[" + i + "]", 0, nbCont);
                 } else cont.positions[i] = null;
+            }
+        }
+    }
+
+    private void printSolution(Solution solution){
+        if(solution == null) System.out.println("No solution found");
+        else {
+            for (Container cont : containers) {
+                for (int i = 0; i < nbStop; i++) {
+                    if (cont.positions[i] != null) {
+                        System.out.print("pos(" + cont.number + "," + i + ") = " + solution.getIntVal(cont.positions[i]) + " ; ");
+                    } else {
+                        System.out.print("pos(" + cont.number + "," + i + ") = null ; ");
+                    }
+                }
+                System.out.print("\n");
+            }
+            System.out.print("\n");
+            for (int p = 0; p < navire.nbPos; p++)  {
+                for (int i = 0; i < nbStop; i++) {
+                    if (solution.getIntVal(positions.get(p).containers[i]) != -1) {
+                        System.out.print("cont(" + positions.get(p).number + "," + i + ") = " + solution.getIntVal(positions.get(p).containers[i]) + " ; ");
+                    } else {
+                        System.out.print("cont(" + positions.get(p).number + "," + i + ") = null ; ");
+                    }
+                }
+                System.out.print("\n");
+            }
+            System.out.print("\n");
+            for (int c = 0; c < navire.nbPosPan; c++) {
+                for (int i = 0; i < nbStop; i++) {
+                    System.out.print("move[" + c + "][" + i + "] = " + solution.getIntVal(move[c][i]) + " ; ");
+                }
+                System.out.print("\n");
+            }
+            System.out.print("\n");
+            for (int i = 0; i < nbStop; i++) {
+                System.out.print("restow[" + i + "] = " + solution.getIntVal(restow[i]) + " ; ");
             }
         }
     }
