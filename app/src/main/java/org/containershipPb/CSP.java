@@ -30,15 +30,24 @@ public class CSP {
         initialiseContVar();
     }
 
-        public void postContraints(){
-        restowTot();
+    public void solve(Boolean restowAllowed) {
+        postContraints(restowAllowed);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
+        if (restowAllowed) model.getSolver().findOptimalSolution(restowTot, false);
+        else model.getSolver().findSolution();
+    }
+
+    public void postContraints(Boolean restowAllowed){
+        if (restowAllowed) restowTot();
         for (int i = 0; i < nbStop; i++) {
-            restow(i);
+            if (restowAllowed) restow(i);
             for (Position pos : positions) {
                 pile(pos, i);
                 movePos(pos, i);
                 for (Container cont : containers) {
                     positionContainerEquiv(pos, cont, i);
+                    if (!restowAllowed) noRestow(cont, i);
                 }
             }
         }
