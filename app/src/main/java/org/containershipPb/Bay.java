@@ -7,10 +7,7 @@ import static org.containershipPb.Navire.numberPos;
 public class Bay {
     int nbBloc;
     ArrayList<Bloc> blocList;
-    public Bay(ArrayList<Bloc> blocList){
-        this.blocList = blocList;
-        nbBloc = blocList.size();
-    }
+
     public Bay(int nbBloc, int nbPileAbove, int nbPilesUnder, int nbPosAbove, int nbPosUnder){
         this.nbBloc = nbBloc;
         this.blocList = new ArrayList<Bloc>();

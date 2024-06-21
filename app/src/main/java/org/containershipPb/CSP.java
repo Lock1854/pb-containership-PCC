@@ -2,6 +2,9 @@ package org.containershipPb;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.ArrayList;
 
 import static org.containershipPb.Data.containers;
 import static org.containershipPb.Navire.positions;
@@ -28,7 +31,9 @@ public class CSP {
     }
 
         public void postContraints(){
+        restowTot();
         for (int i = 0; i < nbStop; i++) {
+            restow(i);
             for (Position pos : positions) {
                 pile(pos, i);
                 movePos(pos, i);
@@ -50,21 +55,24 @@ public class CSP {
     }
 
     private void pile(Position pos, int i){
-        if (pos.support != null && !pos.support.isPanneau) {
+        if (pos.support() != null && !pos.support().isPanneau) {
             model.ifThen(
                     model.arithm(pos.containers[i], "!=", -1),
-                    model.arithm(pos.support.containers[i], "!=", -1)
+                    model.arithm(pos.support().containers[i], "!=", -1)
             );
         }
     }
 
     private void movePos(Position pos, int i){
         // propagation bloquage
-        for (Position bloquant : pos.bloquant) {
-            model.ifThen(
-                    model.arithm(move[pos.number][i], "!=", 0),
-                    model.arithm(move[bloquant.number][i], "!=", 0)
-            );
+        ArrayList<Position> bloquant = pos.bloquant();
+        if (bloquant != null) {
+            for (Position b : bloquant) {
+                model.ifThen(
+                        model.arithm(move[pos.number][i], "!=", 0),
+                        model.arithm(move[b.number][i], "!=", 0)
+                );
+            }
         }
         if (!pos.isPanneau) {
             if (i == nbStop - 1) {
@@ -96,29 +104,34 @@ public class CSP {
         }
     }
 
-//    private void restow(int i){
-//        model.sum(ArrayUtils.getColumn(vars.move, i),
-//                "=",
-//                vars.restow[i].add(navire.nbUnload(i)).add(navire.nbLoad(i)).intVar()).post();
-//    }
-//    private void restowTot(){
-//        model.sum(vars.restow, "=", vars.restowTot).post();
-//    }
+    private void restow(int i){
+        model.sum(ArrayUtils.getColumn(move, i),
+                "=",
+                restow[i].add(data.nbUnload(i)).add(data.nbLoad(i)).intVar()).post();
+    }
+
+    private void restowTot(){
+        model.sum(restow, "=", restowTot).post();
+    }
 
     // probably unecessary due to positionContainerEquiv, but maybe helpful ?
-//    private void DifferentPositions(int i){
-//        Position[] posI = ArrayUtils.getColumn(vars.position, i);
-//        IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPosPan);
-//        for (int c = 0; c < nbCont; c++) {
-//            if (posI[c] != null) vars[c] = posI[c].intVar;
-//        }
-//        model.allDifferent(vars).post();
-//    }
+    private void DifferentPositions(int i){
+        IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPos);
+        int compteur = 0;
+        for (Container cont : data.transportedConts(i)) {
+            vars[compteur] = cont.positions[i];
+            compteur++;
+        }
+        model.allDifferent(vars).post();
+    }
 
     private void initialisePosVar(){
         for (Position pos : positions){
-            for (int i = 0; i < pos.containers.length; i++) {
-                pos.containers[i] = model.intVar("container[" + i + "]", data.transportedContsNo(i));
+            if (!pos.isPanneau) {
+                pos.containers = new IntVar[nbStop];
+                for (int i = 0; i < nbStop; i++) {
+                    pos.containers[i] = model.intVar("container[" + i + "]", data.transportedContsNo(i));
+                }
             }
         }
     }

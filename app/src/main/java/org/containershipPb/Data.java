@@ -17,17 +17,38 @@ public class Data {
         containers = buildConts();
     }
 
-    public int[] transportedContsNo(int i){
-        ArrayList<Integer> L = new ArrayList<>();
-        L.add(-1);
+    public ArrayList<Container> transportedConts(int i){
+        ArrayList<Container> L = new ArrayList<>();
         for (Container cont : containers){
-            if (i > cont.load && i <= cont.unload) L.add(cont.number);
+            if (i > cont.load && i <= cont.unload) L.add(cont);
         }
-        int[] T = new int[L.size()];
+        return L;
+    }
+
+    public int[] transportedContsNo(int i){
+        ArrayList<Container> L = transportedConts(i);
+        int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
-            T[j] = L.get(j);
+            T[j] = L.get(j).number;
         }
+        T[L.size()] = -1;
         return T;
+    }
+
+    public int nbLoad(int i){
+        int n = 0;
+        for (Container cont : containers){
+            if (cont.load == i) n++;
+        }
+        return n;
+    }
+
+    public int nbUnload(int i){
+        int n = 0;
+        for (Container cont : containers){
+            if (cont.unload == i) n++;
+        }
+        return n;
     }
 
     private Container[] buildConts(){

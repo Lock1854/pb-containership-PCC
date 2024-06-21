@@ -4,8 +4,6 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.ArrayList;
 
 public class Position {
-    ArrayList<Position> bloquant;
-    Position support;
     Boolean isPanneau;
     Integer hauteur;
     int number;
@@ -19,8 +17,6 @@ public class Position {
         this.containers = containers;
         this.number = number;
         this.pile = pile;
-        this.support = support();
-        this.bloquant = bloquant();
     }
 
     public Position(Integer hauteur, int number, Boolean isPanneau, IntVar[] containers, Bloc bloc){
@@ -29,11 +25,9 @@ public class Position {
         this.containers = containers;
         this.number = number;
         this.bloc = bloc;
-        this.support = support();
-        this.bloquant = bloquant();
     }
 
-    private Position support(){
+    public Position support(){
         if (isPanneau) return null;
         if (hauteur == 0){
             if (pile.bloc.pileListUnder.contains(pile)) return null;
@@ -42,7 +36,7 @@ public class Position {
         else return pile.posList.get(hauteur - 1);
     }
 
-    private ArrayList<Position> bloquant(){
+    public ArrayList<Position> bloquant(){
         ArrayList<Position> L = new ArrayList<>();
         if (isPanneau){
             for (Pile pile : bloc.pileListAbove){
