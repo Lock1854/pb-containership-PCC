@@ -114,6 +114,13 @@ public class CSP {
         model.sum(restow, "=", restowTot).post();
     }
 
+    private void noRestow(Container cont, int i){
+        if (i == nbStop - 1) return;
+        if (cont.positions[i] != null && cont.positions[i+1] != null){
+            model.arithm(cont.positions[i], "=", cont.positions[i+1]).post();
+        }
+    }
+
     // probably unecessary due to positionContainerEquiv, but maybe helpful ?
     private void DifferentPositions(int i){
         IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPos);
@@ -128,7 +135,6 @@ public class CSP {
     private void initialisePosVar(){
         for (Position pos : positions){
             if (!pos.isPanneau) {
-                pos.containers = new IntVar[nbStop];
                 for (int i = 0; i < nbStop; i++) {
                     pos.containers[i] = model.intVar("container[" + i + "]", data.transportedContsNo(i));
                 }
@@ -138,7 +144,7 @@ public class CSP {
 
     private void initialiseContVar(){
         for (Container cont : containers){
-            for (int i = 0; i < cont.positions.length; i++) {
+            for (int i = 0; i < nbStop; i++) {
                 if (i > cont.load && i <= cont.unload) {
                     cont.positions[i] = model.intVar("position[" + i + "]", 0, nbCont);
                 } else cont.positions[i] = null;
