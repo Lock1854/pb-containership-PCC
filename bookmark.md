@@ -1,1 +1,2 @@
 - Comprendre pourquoi aucune solution lorsqu'on minimise les restows au lieu de les interdire
+- Rédiger (avec et sans restow)

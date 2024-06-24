@@ -19,27 +19,31 @@ public class CSP {
     IntVar[][] move;
     IntVar[] restow;
     IntVar restowTot;
+    Boolean restowAllowed;
 
-    public CSP(Model model, Navire navire, Data data){
+    public CSP(Model model, Navire navire, Data data, Boolean restowAllowed){
         this.model = model;
         this.navire = navire;
         this.data = data;
+        this.restowAllowed = restowAllowed;
         move = model.intVarMatrix("move", navire.nbPosPan, nbStop, 0, 2, false);
-        restow = model.intVarArray("restow", nbStop, 0, navire.nbPosPan);
-        restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
+        if (restowAllowed) {
+            restow = model.intVarArray("restow", nbStop, 0, navire.nbPosPan);
+            restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
+        }
         initialisePosVar();
         initialiseContVar();
     }
 
-    public void solve(Boolean restowAllowed, Boolean printSolution) {
-        postContraints(restowAllowed);
+    public void solve(Boolean printSolution) {
+        postContraints();
         model.getSolver().showStatistics();
         Solution solution = restowAllowed? model.getSolver().findOptimalSolution(restowTot, false)
                 : model.getSolver().findSolution();
         if (printSolution) printSolution(solution);
     }
 
-    public void postContraints(Boolean restowAllowed){
+    public void postContraints(){
         if (restowAllowed) restowTot();
         for (int i = 0; i < nbStop; i++) {
             if (restowAllowed) restow(i);
@@ -53,6 +57,7 @@ public class CSP {
             }
         }
     }
+
     private void positionContainerEquiv(Position pos, Container cont, int i){
         if (!pos.isPanneau){
         if (cont.positions[i] != null) {
@@ -194,8 +199,10 @@ public class CSP {
                 System.out.print("\n");
             }
             System.out.print("\n");
-            for (int i = 0; i < nbStop; i++) {
-                System.out.print("restow[" + i + "] = " + solution.getIntVal(restow[i]) + " ; ");
+            if (restowAllowed) {
+                for (int i = 0; i < nbStop; i++) {
+                    System.out.print("restow[" + i + "] = " + solution.getIntVal(restow[i]) + " ; ");
+                }
             }
         }
     }
