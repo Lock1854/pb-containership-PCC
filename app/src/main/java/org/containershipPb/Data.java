@@ -11,13 +11,18 @@ import static org.containershipPb.PbSolver.nbStop;
 public class Data {
     static Container[] containers;
     int[][] planification;
+    ArrayList<Container>[] transportedConts;
 
     public Data(){
         this.planification = generatePlanification();
         containers = buildConts();
+        transportedConts = new ArrayList[nbStop];
+        for (int i = 0; i < nbStop; i++) {
+            transportedConts[i] = transportedConts(i);
+        }
     }
 
-    public ArrayList<Container> transportedConts(int i){
+    private ArrayList<Container> transportedConts(int i){
         ArrayList<Container> L = new ArrayList<>();
         for (Container cont : containers){
             if (i > cont.load && i <= cont.unload) L.add(cont);
@@ -26,7 +31,7 @@ public class Data {
     }
 
     public int[] transportedContsNo(int i){
-        ArrayList<Container> L = transportedConts(i);
+        ArrayList<Container> L = transportedConts[i];
         int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;

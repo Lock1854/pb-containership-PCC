@@ -1,2 +1,2 @@
-- Comprendre pourquoi aucune solution lorsqu'on minimise les restows au lieu de les interdire
-- Rédiger (avec et sans restow)
+- contrainte de noRestow ne suffit pas à garantir l'absence de restow
+- version optimisation ne fonctionne toujours pas

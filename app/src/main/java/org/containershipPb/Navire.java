@@ -25,8 +25,6 @@ public class Navire {
             baies.add(new Bay(nbBloc, nbPileAbove,nbPileUnder, nbPosAbove, nbPosUnder));
         }
         this.bayList = baies;
-        positions.addAll(panneaux);
-        for (Position pos : positions) System.out.println(pos.number);
     }
 
     private int computeNbPos(){
