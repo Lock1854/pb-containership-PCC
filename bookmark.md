@@ -1,2 +1,1 @@
-- contrainte de noRestow ne suffit pas à garantir l'absence de restow
-- version optimisation ne fonctionne toujours pas
+- pas de solution à 0 restow

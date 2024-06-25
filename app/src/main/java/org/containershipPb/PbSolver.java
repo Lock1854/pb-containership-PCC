@@ -9,7 +9,7 @@ public class PbSolver {
         Model model = new Model("Chargement navire porte-container");
         Navire navire = new Navire(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
         Data data = new Data();
-        CSP csp = new CSP(model, navire, data, true);
+        CSP csp = new CSP(model, navire, data, false);
         csp.solve(true);
     }
 }

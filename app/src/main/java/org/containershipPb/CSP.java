@@ -50,7 +50,7 @@ public class CSP {
                 movePos(pos, i);
                 for (Container cont : data.transportedConts[i]) {
                     positionContainerEquiv(pos, cont, i);
-                    if (!restowAllowed) noRestow(cont, i);
+                    if (!restowAllowed) noRestow(pos, cont, i);
                 }
             }
         }
@@ -152,17 +152,24 @@ public class CSP {
     private void restow(int i){
         model.sum(ArrayUtils.getColumn(move, i),
                 "=",
-                restow[i].add(data.nbUnload(i)).add(data.nbLoad(i)).intVar()).post();
+                restow[i].add(data.nbUnload(i)).add(data.nbLoad(i)).intVar()
+        ).post();
     }
 
     private void restowTot(){
         model.sum(restow, "=", restowTot).post();
     }
 
-    private void noRestow(Container cont, int i){
-        if (i == nbStop - 1) return;
-        if (cont.positions[i] != null && cont.positions[i+1] != null){
-            model.arithm(cont.positions[i], "=", cont.positions[i+1]).post();
+    private void noRestow(Position pos, Container cont, int i){
+
+        if (i < nbStop - 1 && cont.positions[i] != null && cont.positions[i+1] != null) {
+            model.ifThen(
+                    model.arithm(cont.positions[i], "=", pos.number),
+                    model.and(
+                            model.arithm(cont.positions[i], "=", cont.positions[i + 1]),
+                            model.arithm(move[pos.number][i], "=", 0)
+                    )
+            );
         }
     }
 
