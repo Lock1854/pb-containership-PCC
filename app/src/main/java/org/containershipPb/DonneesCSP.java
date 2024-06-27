@@ -7,7 +7,6 @@ import com.opencsv.exceptions.CsvException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class DonneesCSP {
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) {
         Path path = Paths.get("donnees-csp-opti-poscont.csv");
         List<String[]> doc;
         try (Reader reader = Files.newBufferedReader(path)) {

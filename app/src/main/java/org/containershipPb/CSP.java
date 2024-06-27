@@ -6,8 +6,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.ArrayList;
-
 import static org.containershipPb.Data.containers;
 import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.*;
@@ -19,13 +17,14 @@ public class CSP {
     IntVar[][] move;
     IntVar[] restow;
     IntVar restowTot;
-    Boolean restowAllowed;
+    Boolean restowAllowed, table;
 
-    public CSP(Model model, Navire navire, Data data, Boolean restowAllowed){
+    public CSP(Model model, Navire navire, Data data, Boolean restowAllowed, Boolean table){
         this.model = model;
         this.navire = navire;
         this.data = data;
         this.restowAllowed = restowAllowed;
+        this.table = table;
         move = model.intVarMatrix("move", navire.nbPosPan, nbStop, 0, 2, false);
         nbVar += navire.nbPosPan * nbStop;
         if (restowAllowed) {
@@ -64,10 +63,14 @@ public class CSP {
 
     private void positionContainerEquiv(Position pos, Container cont, int i){
         if (cont.positions[i] != null) {
-            model.ifOnlyIf(
-                    model.arithm(cont.positions[i], "=", pos.number),
-                    model.arithm(pos.containers[i], "=", cont.number)
-            );
+            if (table) {
+                model.table(pos.containers[i], cont.positions[i], TupleGenerator.getContPosEquiv(pos, cont), "FC").post();
+            } else {
+                model.ifOnlyIf(
+                        model.arithm(cont.positions[i], "=", pos.number),
+                        model.arithm(pos.containers[i], "=", cont.number)
+                );
+            }
         } else model.arithm(pos.containers[i], "!=", cont.number).post();
     }
 
