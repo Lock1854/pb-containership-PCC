@@ -11,7 +11,7 @@ public class Navire {
     public Navire(int nbBay, int nbBloc, int nbPileAbove, int nbPileUnder, int nbPosAbove, int nbPosUnder){
         this.nbBay = nbBay;
         this.nbBloc = nbBloc;
-        this.nbPileAbove = nbPosAbove;
+        this.nbPileAbove = nbPileAbove;
         this.nbPileUnder = nbPileUnder;
         this.hMaxAbove = nbPosAbove;
         this.hMaxUnder = nbPosUnder;

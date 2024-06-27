@@ -2,13 +2,15 @@ package org.containershipPb;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.ArrayList;
+
 import static org.containershipPb.Data.containers;
 import static org.containershipPb.Navire.positions;
-import static org.containershipPb.PbSolver.nbCont;
-import static org.containershipPb.PbSolver.nbStop;
+import static org.containershipPb.PbSolver.*;
 
 public class CSP {
     Model model;
@@ -25,20 +27,24 @@ public class CSP {
         this.data = data;
         this.restowAllowed = restowAllowed;
         move = model.intVarMatrix("move", navire.nbPosPan, nbStop, 0, 2, false);
+        nbVar += navire.nbPosPan * nbStop;
         if (restowAllowed) {
             restow = model.intVarArray("restow", nbStop, 0, navire.nbPosPan);
             restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
+            nbVar += nbStop + 1;
         }
         initialisePosVar();
         initialiseContVar();
     }
 
-    public void solve(Boolean printSolution) {
+    public void solve(String useSolution) {
         postContraints();
         model.getSolver().showStatistics();
+        Solver solver = model.getSolver();
+        if (useSolution.equals("show")) solver.showSolutions();
         Solution solution = restowAllowed? model.getSolver().findOptimalSolution(restowTot, false)
-                : model.getSolver().findSolution();
-        if (printSolution) printSolution(solution);
+                : solver.findSolution();
+        if (useSolution.equals("print")) printSolution(solution);
     }
 
     public void postContraints(){
@@ -188,7 +194,8 @@ public class CSP {
         for (Position pos : positions){
             if (!pos.isPanneau) {
                 for (int i = 0; i < nbStop; i++) {
-                    pos.containers[i] = model.intVar("container[" + i + "]", data.transportedContsNo(i));
+                    pos.containers[i] = model.intVar("container[" + pos.number + "][" + i + "]", data.transportedContsNo(i));
+                    nbVar++;
                 }
             }
         }
@@ -198,7 +205,8 @@ public class CSP {
         for (Container cont : containers){
             for (int i = 0; i < nbStop; i++) {
                 if (i > cont.load && i <= cont.unload) {
-                    cont.positions[i] = model.intVar("position[" + i + "]", 0, nbCont);
+                    cont.positions[i] = model.intVar("position[" + cont.number + "][" + i + "]", 0, nbCont);
+                    nbVar++;
                 } else cont.positions[i] = null;
             }
         }
