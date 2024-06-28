@@ -18,6 +18,7 @@ public class CSP {
     IntVar[] restow;
     IntVar restowTot;
     Boolean restowAllowed, table;
+    TupleGenerator tupleGen;
 
     public CSP(Model model, Navire navire, Data data, Boolean restowAllowed, Boolean table){
         this.model = model;
@@ -32,18 +33,19 @@ public class CSP {
             restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
             nbVar += nbStop + 1;
         }
+        if (table) tupleGen = new TupleGenerator(data);
         initialisePosVar();
         initialiseContVar();
     }
 
-    public void solve(String useSolution) {
+    public void solve(String usageSolution) {
         postContraints();
         model.getSolver().showStatistics();
         Solver solver = model.getSolver();
-        if (useSolution.equals("show")) solver.showSolutions();
+        if (usageSolution.equals("show")) solver.showSolutions();
         Solution solution = restowAllowed? model.getSolver().findOptimalSolution(restowTot, false)
                 : solver.findSolution();
-        if (useSolution.equals("print")) printSolution(solution);
+        if (usageSolution.equals("print")) printSolution(solution);
     }
 
     public void postContraints(){
@@ -64,7 +66,7 @@ public class CSP {
     private void positionContainerEquiv(Position pos, Container cont, int i){
         if (cont.positions[i] != null) {
             if (table) {
-                model.table(pos.containers[i], cont.positions[i], TupleGenerator.getContPosEquiv(pos, cont), "FC").post();
+                model.table(pos.containers[i], cont.positions[i], tupleGen.getContPosEquiv(cont, pos, i), "FC").post();
             } else {
                 model.ifOnlyIf(
                         model.arithm(cont.positions[i], "=", pos.number),
@@ -84,6 +86,30 @@ public class CSP {
     }
 
     private void movePos(Position pos, int i){
+        if (table) {
+            if (i == nbStop - 1) {
+                model.table(
+                        new IntVar[]{pos.containers[i], move[pos.number][i]},
+                        tupleGen.getMovePos(pos, true, false)
+                ).post();
+            } else if (pos.support() == null){
+                model.table(
+                        new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], model.intVar(0)},
+                        tupleGen.getMovePos(pos, false, false)
+                ).post();
+            } else {
+                model.table(
+                        new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support().number][i]},
+                        tupleGen.getMovePos(pos, false, true)
+                ).post();
+            }
+            if (pos.pile.bloc.pileListUnder.contains(pos.pile)) {
+                model.table(
+                        new IntVar[]{move[pos.number][i], move[pos.pile.bloc.panneau.number][i]},
+                        tupleGen.getMovePan()
+                ).post();
+            }
+        } else {
             if (i == nbStop - 1) {
                 // cas de la dernière étape
                 model.ifThenElse(
@@ -121,7 +147,7 @@ public class CSP {
                         model.arithm(move[pos.number][i], "=", 0)
                 );
                 // cas cont(p,i) = cont(p,i+1) != null
-                if (pos.support() == null){
+                if (pos.support() == null) {
                     model.ifThen(
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
@@ -148,13 +174,14 @@ public class CSP {
                     );
                 }
             }
-        // propagation bloquage
-        if (pos.pile.bloc.pileListUnder.contains(pos.pile)){
-            model.ifThenElse(
-                    model.arithm(move[pos.number][i], "!=", 0),
-                    model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 2),
-                    model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 0)
-            );
+            // propagation bloquage
+            if (pos.pile.bloc.pileListUnder.contains(pos.pile)) {
+                model.ifThenElse(
+                        model.arithm(move[pos.number][i], "!=", 0),
+                        model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 2),
+                        model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 0)
+                );
+            }
         }
     }
 
@@ -208,7 +235,7 @@ public class CSP {
         for (Container cont : containers){
             for (int i = 0; i < nbStop; i++) {
                 if (i > cont.load && i <= cont.unload) {
-                    cont.positions[i] = model.intVar("position[" + cont.number + "][" + i + "]", 0, nbCont);
+                    cont.positions[i] = model.intVar("position[" + cont.number + "][" + i + "]", 0, navire.nbPos - 1);
                     nbVar++;
                 } else cont.positions[i] = null;
             }
@@ -242,7 +269,7 @@ public class CSP {
             System.out.print("\n");
             for (int c = 0; c < navire.nbPosPan; c++) {
                 for (int i = 0; i < nbStop; i++) {
-                    System.out.print("move[" + c + "][" + i + "] = " + solution.getIntVal(move[c][i]) + " ; ");
+                    System.out.print("move(" + c + "," + i + ") = " + solution.getIntVal(move[c][i]) + " ; ");
                 }
                 System.out.print("\n");
             }

@@ -2,30 +2,79 @@ package org.containershipPb;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 
-import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.nbCont;
 
 public class TupleGenerator {
-    static int compt = 0;
+    Boolean show = true;
+    Data data;
 
-    static public Tuples getContPosEquiv(Position pos, Container cont){
+    public TupleGenerator(Data data){
+        this.data = data;
+    }
+
+    public Tuples getContPosEquiv(Container cont, Position pos, int i){
         Tuples t = new Tuples(true);
-        for (int p = 0; p < positions.size(); p++) {
-            for (int c = -1; c < nbCont; c++) {
-                if (c != cont.number && p != pos.number){
+        for (int p = cont.positions[i].getLB(); p <= cont.positions[i].getUB(); p++) {
+            for (int c : data.transportedContsNo(i)) {
+                if ((c != cont.number && p != pos.number) || (c == cont.number && p == pos.number)){
                     t.add(c,p);
                 }
             }
         }
-        t.add(cont.number, pos.number);
-        if (compt == 0) {
+        if (show) {
             System.out.println(
                     "Position : " + pos.number + "\n"
                             + "Container : " + cont.number + "\n"
                             + t
             );
-            compt++;
+            show = false;
         }
+        return t;
+    }
+
+    public Tuples getMovePos(Position pos, Boolean lastStep, Boolean isSupported){
+        int star = -2;
+        Tuples t = new Tuples(true);
+        t.setUniversalValue(star);
+        if (lastStep) {
+            for (int c = -1; c < nbCont; c++) {
+                for (int m = 0; m < 3; m++) {
+                    if ((c == -1 && m == 0) || (c != -1 && m == 1)){
+                        t.add(c,m);
+                    }
+                }
+            }
+        } else {
+            for (int c = -1; c < nbCont; c++) {
+                for (int d = -1; d < nbCont; d++) {
+                    if (c != d){
+                        if (c == -1 || d == -1) t.add(c,d,1,star);
+                        else t.add(c,d,2,star);
+                    } else{
+                        if (c == -1) t.add(c,d,0,star);
+                        else {
+                            if (!isSupported) t.add(c,d,0,star);
+                            else {
+                                t.add(c,d,0,0);
+                                t.add(c,d,2,1);
+                                t.add(c,d,2,2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return t;
+    }
+
+    public Tuples getMovePan(){
+        Tuples t = new Tuples(true);
+        int star = -2;
+        t.setUniversalValue(star);
+        t.add(0,0);
+        t.add(0,2);
+        t.add(1,2);
+        t.add(2,2);
         return t;
     }
 }
