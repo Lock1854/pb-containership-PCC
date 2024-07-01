@@ -2,10 +2,11 @@ package org.containershipPb;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 
+import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.nbCont;
 
 public class TupleGenerator {
-    Boolean show = true;
+    Boolean show = false;
     Data data;
 
     public TupleGenerator(Data data){
@@ -32,7 +33,7 @@ public class TupleGenerator {
         return t;
     }
 
-    public Tuples getMovePos(Position pos, Boolean lastStep, Boolean isSupported){
+    public Tuples getMovePos(Boolean lastStep, Boolean isSupported){
         int star = -2;
         Tuples t = new Tuples(true);
         t.setUniversalValue(star);
@@ -69,12 +70,18 @@ public class TupleGenerator {
 
     public Tuples getMovePan(){
         Tuples t = new Tuples(true);
-        int star = -2;
-        t.setUniversalValue(star);
         t.add(0,0);
         t.add(0,2);
         t.add(1,2);
         t.add(2,2);
+        return t;
+    }
+
+    public Tuples getPile(){
+        Tuples t = new Tuples(false);
+        for (int c = 0; c < positions.size(); c++) {
+            t.add(-1,c);
+        }
         return t;
     }
 }

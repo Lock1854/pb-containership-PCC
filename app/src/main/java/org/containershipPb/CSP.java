@@ -78,10 +78,14 @@ public class CSP {
 
     private void pile(Position pos, int i){
         if (pos.support() != null && !pos.support().isPanneau) {
-            model.ifThen(
-                    model.arithm(pos.containers[i], "!=", -1),
-                    model.arithm(pos.support().containers[i], "!=", -1)
-            );
+            if (table){
+                model.table(pos.containers[i], pos.support().containers[i], tupleGen.getPile()).post();
+            } else {
+                model.ifThen(
+                        model.arithm(pos.containers[i], "!=", -1),
+                        model.arithm(pos.support().containers[i], "!=", -1)
+                );
+            }
         }
     }
 
@@ -90,17 +94,17 @@ public class CSP {
             if (i == nbStop - 1) {
                 model.table(
                         new IntVar[]{pos.containers[i], move[pos.number][i]},
-                        tupleGen.getMovePos(pos, true, false)
+                        tupleGen.getMovePos(true, false)
                 ).post();
             } else if (pos.support() == null){
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], model.intVar(0)},
-                        tupleGen.getMovePos(pos, false, false)
+                        tupleGen.getMovePos(false, false)
                 ).post();
             } else {
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support().number][i]},
-                        tupleGen.getMovePos(pos, false, true)
+                        tupleGen.getMovePos(false, true)
                 ).post();
             }
             if (pos.pile.bloc.pileListUnder.contains(pos.pile)) {
