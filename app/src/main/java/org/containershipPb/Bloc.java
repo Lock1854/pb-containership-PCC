@@ -1,8 +1,11 @@
 package org.containershipPb;
 
+import org.chocosolver.solver.variables.IntVar;
+
 import java.util.ArrayList;
 
 import static org.containershipPb.Navire.*;
+import static org.containershipPb.PbSolver.nbStop;
 
 public class Bloc {
     int nbPilesAbove, nbPilesUnder;
@@ -22,7 +25,7 @@ public class Bloc {
         for (int i = 0; i < nbPileAbove; i++) {
             this.pileListAbove.add(new Pile(nbPosAbove, this));
         }
-        this.panneau = new Position(null, numberPan, true, null, this);
+        this.panneau = new Position(null, numberPan, true, new IntVar[nbStop], this);
         numberPan++;
         panneaux.add(panneau);
     }

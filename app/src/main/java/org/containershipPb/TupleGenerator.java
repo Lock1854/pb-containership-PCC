@@ -13,26 +13,6 @@ public class TupleGenerator {
         this.data = data;
     }
 
-    public Tuples getContPosEquiv(Container cont, Position pos, int i){
-        Tuples t = new Tuples(true);
-        for (int p = cont.positions[i].getLB(); p <= cont.positions[i].getUB(); p++) {
-            for (int c : data.transportedContsNo(i)) {
-                if ((c != cont.number && p != pos.number) || (c == cont.number && p == pos.number)){
-                    t.add(c,p);
-                }
-            }
-        }
-        if (show) {
-            System.out.println(
-                    "Position : " + pos.number + "\n"
-                            + "Container : " + cont.number + "\n"
-                            + t
-            );
-            show = false;
-        }
-        return t;
-    }
-
     public Tuples getMovePos(Boolean lastStep, Boolean isSupported){
         int star = -2;
         Tuples t = new Tuples(true);

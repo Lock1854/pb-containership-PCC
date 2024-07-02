@@ -3,6 +3,7 @@ package org.containershipPb;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import static org.containershipPb.PbSolver.nbCont;
@@ -14,15 +15,16 @@ public class Data {
     ArrayList<Container>[] transportedConts;
 
     public Data(){
-        this.planification = generatePlanification();
+        this.planification = generatePlannification(1);
+        System.out.println(Arrays.deepToString(this.planification));
         containers = buildConts();
         transportedConts = new ArrayList[nbStop];
         for (int i = 0; i < nbStop; i++) {
-            transportedConts[i] = transportedConts(i);
+            transportedConts[i] = onboardConts(i);
         }
     }
 
-    private ArrayList<Container> transportedConts(int i){
+    private ArrayList<Container> onboardConts(int i){
         ArrayList<Container> L = new ArrayList<>();
         for (Container cont : containers){
             if (i > cont.load && i <= cont.unload) L.add(cont);
@@ -30,13 +32,22 @@ public class Data {
         return L;
     }
 
-    public int[] transportedContsNo(int i){
+    public int[] onboardContsNo(int i, Position pos){
         ArrayList<Container> L = transportedConts[i];
         int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
         }
-        T[L.size()] = -1;
+        T[L.size()] = - pos.number;
+        return T;
+    }
+
+    public int[] onboardContsNo(int i){
+        ArrayList<Container> L = transportedConts[i];
+        int[] T = new int[L.size()];
+        for (int j = 0; j < L.size(); j++) {
+            T[j] = L.get(j).number;
+        }
         return T;
     }
 
@@ -64,15 +75,18 @@ public class Data {
         return t;
     }
 
-    private int[][] generatePlanification() {
-        int[][] planification = new int[nbCont][2];
+    private int[][] generatePlannification(int numberTypes){
+        int[][] t = new int[nbCont][2];
         Random random = new Random();
-
+        int compt = 0;
+        int[] pair = null;
         for (int c = 0; c < nbCont; c++) {
-            int[] pair = generateValidPair(random);
-            planification[c] = pair;
+            if (compt == 0 && c != nbCont - 1) pair = generateValidPair(random);
+            t[c] = pair;
+            if (compt == nbCont / numberTypes - 1) compt = 0;
+            else compt++;
         }
-        return planification;
+        return t;
     }
 
     private int[] generateValidPair(Random random) {

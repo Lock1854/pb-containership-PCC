@@ -6,7 +6,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import static org.containershipPb.Data.containers;
 import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.*;
 
@@ -35,7 +34,6 @@ public class CSP {
         }
         if (table) tupleGen = new TupleGenerator(data);
         initialisePosVar();
-        initialiseContVar();
     }
 
     public void solve(String usageSolution) {
@@ -49,47 +47,41 @@ public class CSP {
     }
 
     public void postContraints(){
-        if (restowAllowed) restowTot();
+        if (restowAllowed) computeRestowTot();
         for (int i = 0; i < nbStop; i++) {
-            if (restowAllowed) restow(i);
+            forceDifferentPositions(i);
+            ensureAllTransported(i);
+            if (restowAllowed) computeRestow(i);
             for (Position pos : positions) {
-                pile(pos, i);
-                movePos(pos, i);
-                for (Container cont : data.transportedConts[i]) {
-                    positionContainerEquiv(pos, cont, i);
-                    if (!restowAllowed) noRestow(pos, cont, i);
-                }
+                ensureStack(pos, i);
+                computeMove(pos, i);
             }
         }
     }
 
-    private void positionContainerEquiv(Position pos, Container cont, int i){
-        if (cont.positions[i] != null) {
-            if (table) {
-                model.table(pos.containers[i], cont.positions[i], tupleGen.getContPosEquiv(cont, pos, i), "FC").post();
-            } else {
-                model.ifOnlyIf(
-                        model.arithm(cont.positions[i], "=", pos.number),
-                        model.arithm(pos.containers[i], "=", cont.number)
-                );
-            }
-        } else model.arithm(pos.containers[i], "!=", cont.number).post();
+    private void forceDifferentPositions(int i){
+        model.allDifferent(getAllContent(i)).post();
     }
 
-    private void pile(Position pos, int i){
+    private void ensureAllTransported(int i){
+        IntVar[] t = model.intVarArray(data.transportedConts[i].size(), new int[]{1});
+        model.globalCardinality(getAllContent(i), data.onboardContsNo(i), t, true).post();
+    }
+
+    private void ensureStack(Position pos, int i){
         if (pos.support() != null && !pos.support().isPanneau) {
             if (table){
                 model.table(pos.containers[i], pos.support().containers[i], tupleGen.getPile()).post();
             } else {
                 model.ifThen(
-                        model.arithm(pos.containers[i], "!=", -1),
-                        model.arithm(pos.support().containers[i], "!=", -1)
+                        model.arithm(pos.containers[i], "!=", - pos.number),
+                        model.arithm(pos.support().containers[i], "!=", - pos.number)
                 );
             }
         }
     }
 
-    private void movePos(Position pos, int i){
+    private void computeMove(Position pos, int i){
         if (table) {
             if (i == nbStop - 1) {
                 model.table(
@@ -113,11 +105,12 @@ public class CSP {
                         tupleGen.getMovePan()
                 ).post();
             }
-        } else {
+        } else if (pos.isPanneau) return;
+        else {
             if (i == nbStop - 1) {
                 // cas de la dernière étape
                 model.ifThenElse(
-                        model.arithm(pos.containers[i], "=", -1),
+                        model.arithm(pos.containers[i], "=", - pos.number),
                         model.arithm(move[pos.number][i], "=", 0),
                         model.arithm(move[pos.number][i], "=", 1)
                 );
@@ -127,8 +120,8 @@ public class CSP {
                         model.and(
                                 model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
                                 model.or(
-                                        model.arithm(pos.containers[i], "=", -1),
-                                        model.arithm(pos.containers[i + 1], "=", -1)
+                                        model.arithm(pos.containers[i], "=", - pos.number),
+                                        model.arithm(pos.containers[i + 1], "=", - pos.number)
                                 )
                         ),
                         model.arithm(move[pos.number][i], "=", 1)
@@ -137,8 +130,8 @@ public class CSP {
                 model.ifThen(
                         model.and(
                                 model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
-                                model.arithm(pos.containers[i], "!=", -1),
-                                model.arithm(pos.containers[i + 1], "!=", -1)
+                                model.arithm(pos.containers[i], "!=", - pos.number),
+                                model.arithm(pos.containers[i + 1], "!=", - pos.number)
                         ),
                         model.arithm(move[pos.number][i], "=", 2)
                 );
@@ -146,7 +139,7 @@ public class CSP {
                 model.ifThen(
                         model.and(
                                 model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
-                                model.arithm(pos.containers[i], "=", -1)
+                                model.arithm(pos.containers[i], "=", - pos.number)
                         ),
                         model.arithm(move[pos.number][i], "=", 0)
                 );
@@ -155,7 +148,7 @@ public class CSP {
                     model.ifThen(
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
-                                    model.arithm(pos.containers[i], "!=", -1)
+                                    model.arithm(pos.containers[i], "!=", - pos.number)
                             ),
                             model.arithm(move[pos.number][i], "=", 0)
                     );
@@ -163,7 +156,7 @@ public class CSP {
                     model.ifThen(
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
-                                    model.arithm(pos.containers[i], "!=", -1),
+                                    model.arithm(pos.containers[i], "!=", - pos.number),
                                     model.arithm(move[pos.support().number][i], "=", 0)
                             ),
                             model.arithm(move[pos.number][i], "=", 0)
@@ -171,7 +164,7 @@ public class CSP {
                     model.ifThen(
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
-                                    model.arithm(pos.containers[i], "!=", -1),
+                                    model.arithm(pos.containers[i], "!=", - pos.number),
                                     model.arithm(move[pos.support().number][i], "!=", 0)
                             ),
                             model.arithm(move[pos.number][i], "=", 2)
@@ -180,85 +173,68 @@ public class CSP {
             }
             // propagation bloquage
             if (pos.pile.bloc.pileListUnder.contains(pos.pile)) {
-                model.ifThenElse(
+                model.ifThen(
                         model.arithm(move[pos.number][i], "!=", 0),
-                        model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 2),
-                        model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 0)
+                        model.arithm(move[pos.pile.bloc.panneau.number][i], "=", 2)
                 );
             }
         }
     }
 
-    private void restow(int i){
+    private void computeRestow(int i){
         model.sum(ArrayUtils.getColumn(move, i),
                 "=",
                 restow[i].add(data.nbUnload(i)).add(data.nbLoad(i)).intVar()
         ).post();
     }
 
-    private void restowTot(){
+    private void computeRestowTot(){
         model.sum(restow, "=", restowTot).post();
     }
 
-    private void noRestow(Position pos, Container cont, int i){
-
-        if (i < nbStop - 1 && cont.positions[i] != null && cont.positions[i+1] != null) {
-            model.ifThen(
-                    model.arithm(cont.positions[i], "=", pos.number),
-                    model.and(
-                            model.arithm(cont.positions[i], "=", cont.positions[i + 1]),
-                            model.arithm(move[pos.number][i], "=", 0)
-                    )
-            );
-        }
-    }
-
-    // probably unecessary due to positionContainerEquiv, but maybe helpful ?
-    private void differentPositions(int i){
-        IntVar[] vars = model.intVarArray(nbCont, 0, navire.nbPos);
-        int compteur = 0;
-        for (Container cont : data.transportedConts[i]) {
-            vars[compteur] = cont.positions[i];
-            compteur++;
-        }
-        model.allDifferent(vars).post();
-    }
+//    private void forbidRestow(Position pos, Container cont, int i){
+//        if (i == nbStop - 1) return;
+//        else {
+//            model.ifThen(
+//                    model.and(
+//                            model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
+//                            model.arithm(pos.containers[i], "!=", - pos.number)
+//                    ),
+//
+//            );
+//        }
+//    }
 
     private void initialisePosVar(){
         for (Position pos : positions){
-            if (!pos.isPanneau) {
+            if (pos.isPanneau){
                 for (int i = 0; i < nbStop; i++) {
-                    pos.containers[i] = model.intVar("container[" + pos.number + "][" + i + "]", data.transportedContsNo(i));
+                    pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", new int[]{- pos.number});
+                    nbVar++;
+                }
+            }
+            else {
+                for (int i = 0; i < nbStop; i++) {
+                    pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", data.onboardContsNo(i, pos));
                     nbVar++;
                 }
             }
         }
     }
 
-    private void initialiseContVar(){
-        for (Container cont : containers){
-            for (int i = 0; i < nbStop; i++) {
-                if (i > cont.load && i <= cont.unload) {
-                    cont.positions[i] = model.intVar("position[" + cont.number + "][" + i + "]", 0, navire.nbPos - 1);
-                    nbVar++;
-                } else cont.positions[i] = null;
-            }
+    private IntVar[] getAllContent(int i){
+        IntVar[] vars = new IntVar[positions.size()];
+        int compteur = 0;
+        for (Position pos : positions) {
+            vars[compteur] = pos.containers[i];
+            compteur++;
         }
+        return vars;
     }
 
     private void printSolution(Solution solution){
         if(solution == null) System.out.println("No solution found");
         else {
-            for (Container cont : containers) {
-                for (int i = 0; i < nbStop; i++) {
-                    if (cont.positions[i] != null) {
-                        System.out.print("pos(" + cont.number + "," + i + ") = " + solution.getIntVal(cont.positions[i]) + " ; ");
-                    } else {
-                        System.out.print("pos(" + cont.number + "," + i + ") = null ; ");
-                    }
-                }
-                System.out.print("\n");
-            }
             System.out.print("\n");
             for (int p = 0; p < navire.nbPos; p++)  {
                 for (int i = 0; i < nbStop; i++) {
