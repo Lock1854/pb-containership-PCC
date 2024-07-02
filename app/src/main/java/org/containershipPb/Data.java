@@ -1,7 +1,5 @@
 package org.containershipPb;
 
-import org.chocosolver.solver.variables.IntVar;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -12,15 +10,15 @@ import static org.containershipPb.PbSolver.nbStop;
 public class Data {
     static Container[] containers;
     int[][] planification;
-    ArrayList<Container>[] transportedConts;
+    ArrayList<Container>[] onboardConts;
 
     public Data(){
         this.planification = generatePlannification(1);
         System.out.println(Arrays.deepToString(this.planification));
         containers = buildConts();
-        transportedConts = new ArrayList[nbStop];
+        onboardConts = new ArrayList[nbStop];
         for (int i = 0; i < nbStop; i++) {
-            transportedConts[i] = onboardConts(i);
+            onboardConts[i] = onboardConts(i);
         }
     }
 
@@ -33,7 +31,7 @@ public class Data {
     }
 
     public int[] onboardContsNo(int i, Position pos){
-        ArrayList<Container> L = transportedConts[i];
+        ArrayList<Container> L = onboardConts[i];
         int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
@@ -43,7 +41,7 @@ public class Data {
     }
 
     public int[] onboardContsNo(int i){
-        ArrayList<Container> L = transportedConts[i];
+        ArrayList<Container> L = onboardConts[i];
         int[] T = new int[L.size()];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
@@ -70,7 +68,7 @@ public class Data {
     private Container[] buildConts(){
         Container[] t = new Container[nbCont];
         for (int c = 0; c <nbCont; c++) {
-            t[c] = new Container(planification[c][0], planification[c][1], new IntVar[nbStop], c);
+            t[c] = new Container(planification[c][0], planification[c][1], c+1);
         }
         return t;
     }

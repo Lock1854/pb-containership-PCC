@@ -4,7 +4,7 @@ import org.chocosolver.solver.Model;
 
 
 public class PbSolver {
-    static int nbCont = 10, nbStop = 4, nbBay = 2, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 0, nbPosAbove = 2, nbPosUnder = 2;
+    static int nbCont = 8, nbStop = 4, nbBay = 2, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 0, nbPosAbove = 2, nbPosUnder = 2;
     static int nbVar = 0;
     int nbVarSup;
 

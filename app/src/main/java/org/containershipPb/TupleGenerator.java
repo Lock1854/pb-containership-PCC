@@ -6,7 +6,6 @@ import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.nbCont;
 
 public class TupleGenerator {
-    Boolean show = false;
     Data data;
 
     public TupleGenerator(Data data){

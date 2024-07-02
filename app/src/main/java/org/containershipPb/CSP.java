@@ -64,8 +64,8 @@ public class CSP {
     }
 
     private void ensureAllTransported(int i){
-        IntVar[] t = model.intVarArray(data.transportedConts[i].size(), new int[]{1});
-        model.globalCardinality(getAllContent(i), data.onboardContsNo(i), t, true).post();
+        IntVar[] t = model.intVarArray(data.onboardConts[i].size(), new int[]{1});
+        model.globalCardinality(getAllContent(i), data.onboardContsNo(i), t, false).post();
     }
 
     private void ensureStack(Position pos, int i){
@@ -238,7 +238,7 @@ public class CSP {
             System.out.print("\n");
             for (int p = 0; p < navire.nbPos; p++)  {
                 for (int i = 0; i < nbStop; i++) {
-                    if (solution.getIntVal(positions.get(p).containers[i]) != -1) {
+                    if (solution.getIntVal(positions.get(p).containers[i]) > 0) {
                         System.out.print("cont(" + positions.get(p).number + "," + i + ") = " + solution.getIntVal(positions.get(p).containers[i]) + " ; ");
                     } else {
                         System.out.print("cont(" + positions.get(p).number + "," + i + ") = null ; ");
