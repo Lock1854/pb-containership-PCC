@@ -44,7 +44,7 @@ public class TupleGenerator {
                 }
             }
         }
-        return t;
+        return null;
     }
 
     public Tuples getMovePan(){
@@ -53,13 +53,13 @@ public class TupleGenerator {
         t.add(0,2);
         t.add(1,2);
         t.add(2,2);
-        return t;
+        return null;
     }
 
-    public Tuples getPile(){
+    public Tuples getPile(Position pos){
         Tuples t = new Tuples(false);
-        for (int c = 0; c < positions.size(); c++) {
-            t.add(-1,c);
+        for (int c = 1; c <= nbCont; c++) {
+            t.add(c,-pos.support.number);
         }
         return t;
     }

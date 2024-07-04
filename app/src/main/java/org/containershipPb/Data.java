@@ -13,7 +13,7 @@ public class Data {
     ArrayList<Container>[] onboardConts;
 
     public Data(){
-        this.planification = generatePlannification(1);
+        this.planification = generatePlannification(3);
         System.out.println(Arrays.deepToString(this.planification));
         containers = buildConts();
         onboardConts = new ArrayList[nbStop];
@@ -49,6 +49,22 @@ public class Data {
         return T;
     }
 
+    public int[] Load(int i){
+        int[] T = new int[nbLoad(i)];
+        for (int c = 0; c < nbCont; c++) {
+            if (containers[i].load == i) T[c] = containers[i].number;
+        }
+        return T;
+    }
+
+    public int[] Unload(int i){
+        int[] T = new int[nbUnload(i)];
+        for (int c = 0; c < nbCont; c++) {
+            if (containers[i].unload == i) T[c] = containers[i].number;
+        }
+        return T;
+    }
+
     public int nbLoad(int i){
         int n = 0;
         for (Container cont : containers){
@@ -59,7 +75,7 @@ public class Data {
 
     public int nbUnload(int i){
         int n = 0;
-        for (Container cont : containers){
+        for (Container cont : onboardConts[i]){
             if (cont.unload == i) n++;
         }
         return n;

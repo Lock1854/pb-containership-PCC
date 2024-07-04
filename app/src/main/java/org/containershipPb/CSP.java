@@ -10,8 +10,6 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -49,7 +47,7 @@ public class CSP {
         if (table) tupleGen = new TupleGenerator(data);
     }
 
-    public void solve(String usageSolution) throws IOException {
+    public void solve(String usageSolution) {
         postContraints();
         Solver solver = model.getSolver();
         solver.showStatistics();
@@ -74,6 +72,7 @@ public class CSP {
             for (Position pos : positions) {
                 ensureStack(pos, i);
                 computeMove(pos, i);
+                if (!restowAllowed) forbidRestow(pos, i);
             }
         }
     }
@@ -90,11 +89,11 @@ public class CSP {
     private void ensureStack(Position pos, int i){
         if (pos.support != null && !pos.support.isPanneau) {
             if (table){
-                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getPile()).post();
+                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getPile(pos)).post();
             } else {
                 model.ifThen(
                         model.arithm(pos.containers[i], "!=", - pos.number),
-                        model.arithm(pos.support.containers[i], "!=", - pos.number)
+                        model.arithm(pos.support.containers[i], "!=", - pos.support.number)
                 );
             }
         }
@@ -211,18 +210,22 @@ public class CSP {
         model.sum(restow, "=", restowTot).post();
     }
 
-//    private void forbidRestow(Position pos, Container cont, int i){
-//        if (i == nbStop - 1) return;
-//        else {
-//            model.ifThen(
-//                    model.and(
-//                            model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
-//                            model.arithm(pos.containers[i], "!=", - pos.number)
-//                    ),
-//
-//            );
-//        }
-//    }
+    private void forbidRestow(Position pos, int i){
+        model.ifThen(
+                model.and(
+                        model.arithm(pos.containers[i], "!=", pos.containers[i+1]),
+                        model.arithm(pos.containers[i], "!=", - pos.number)
+                ),
+                model.member(pos.containers[i], data.Unload(i))
+        );
+        model.ifThen(
+                model.and(
+                        model.arithm(pos.containers[i], "!=", pos.containers[i+1]),
+                        model.arithm(pos.containers[i+1], "!=", - pos.number)
+                ),
+                model.member(pos.containers[i], data.Load(i))
+        );
+    }
 
     private void initialiseContVar(){
         for (Position pos : positions){
@@ -273,9 +276,9 @@ public class CSP {
                 int compteur = 0;
                 for (int b = 0; b < nbBay; b++) {
                     compteur = printPiles(solution, printOrderedPos, i, compteur, true);
-                    printSeparator("---", " |");
+                    printSeparator("----", " |");
                     compteur = printPiles(solution, printOrderedPos, i, compteur, false);
-                    printSeparator("===", "==");
+                    printSeparator("====", "==");
                 }
             }
             System.out.print("\n");
@@ -306,7 +309,11 @@ public class CSP {
         for (int lu = 0; lu < posLim; lu++) {
             for (int b = 0; b < nbBloc; b++) {
                 for (int p = 0; p < pileLim; p++) {
-                    System.out.printf("%3d", solution.getIntVal(printOrderedPos[compt].containers[i]));
+                    if (solution.getIntVal(printOrderedPos[compt].containers[i]) == 0) {
+                        System.out.printf("  %s%d", "-", 0);
+                    } else {
+                        System.out.printf("%4d", solution.getIntVal(printOrderedPos[compt].containers[i]));
+                    }
                     compt++;
                 }
                 System.out.printf(" %s", "|");
