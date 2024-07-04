@@ -13,7 +13,7 @@ public class Data {
     ArrayList<Container>[] onboardConts;
 
     public Data(){
-        this.planification = generatePlannification(3);
+        this.planification = generatePlannification(1);
         System.out.println(Arrays.deepToString(this.planification));
         containers = buildConts();
         onboardConts = new ArrayList[nbStop];

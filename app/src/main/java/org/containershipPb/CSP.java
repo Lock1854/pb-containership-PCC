@@ -10,6 +10,8 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -47,7 +49,7 @@ public class CSP {
         if (table) tupleGen = new TupleGenerator(data);
     }
 
-    public void solve(String usageSolution) {
+    public void solve(String usageSolution) throws IOException {
         postContraints();
         Solver solver = model.getSolver();
         solver.showStatistics();
@@ -86,33 +88,33 @@ public class CSP {
     }
 
     private void ensureStack(Position pos, int i){
-        if (pos.support() != null && !pos.support().isPanneau) {
+        if (pos.support != null && !pos.support.isPanneau) {
             if (table){
-                model.table(pos.containers[i], pos.support().containers[i], tupleGen.getPile()).post();
+                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getPile()).post();
             } else {
                 model.ifThen(
                         model.arithm(pos.containers[i], "!=", - pos.number),
-                        model.arithm(pos.support().containers[i], "!=", - pos.number)
+                        model.arithm(pos.support.containers[i], "!=", - pos.number)
                 );
             }
         }
     }
 
     private void computeMove(Position pos, int i){
-        if (table) {
+        if (table && !pos.isPanneau) {
             if (i == nbStop - 1) {
                 model.table(
                         new IntVar[]{pos.containers[i], move[pos.number][i]},
                         tupleGen.getMovePos(true, false)
                 ).post();
-            } else if (pos.support() == null){
+            } else if (pos.support == null){
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], model.intVar(0)},
                         tupleGen.getMovePos(false, false)
                 ).post();
             } else {
                 model.table(
-                        new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support().number][i]},
+                        new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support.number][i]},
                         tupleGen.getMovePos(false, true)
                 ).post();
             }
@@ -122,8 +124,8 @@ public class CSP {
                         tupleGen.getMovePan()
                 ).post();
             }
-        } else if (pos.isPanneau) return;
-        else {
+        }
+        else if (!pos.isPanneau){
             if (i == nbStop - 1) {
                 // cas de la dernière étape
                 model.ifThenElse(
@@ -161,7 +163,7 @@ public class CSP {
                         model.arithm(move[pos.number][i], "=", 0)
                 );
                 // cas cont(p,i) = cont(p,i+1) != null
-                if (pos.support() == null) {
+                if (pos.support == null) {
                     model.ifThen(
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
@@ -174,7 +176,7 @@ public class CSP {
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
                                     model.arithm(pos.containers[i], "!=", - pos.number),
-                                    model.arithm(move[pos.support().number][i], "=", 0)
+                                    model.arithm(move[pos.support.number][i], "=", 0)
                             ),
                             model.arithm(move[pos.number][i], "=", 0)
                     );
@@ -182,7 +184,7 @@ public class CSP {
                             model.and(
                                     model.arithm(pos.containers[i], "=", pos.containers[i + 1]),
                                     model.arithm(pos.containers[i], "!=", - pos.number),
-                                    model.arithm(move[pos.support().number][i], "!=", 0)
+                                    model.arithm(move[pos.support.number][i], "!=", 0)
                             ),
                             model.arithm(move[pos.number][i], "=", 2)
                     );
@@ -264,16 +266,17 @@ public class CSP {
     private void printSolution(Solution solution){
         if(solution == null) System.out.println("No solution found");
         else {
+            Position[] printOrderedPos = getPrintOrderedPos();
             System.out.print("\n");
-            for (int p = 0; p < navire.nbPos; p++)  {
-                for (int i = 0; i < nbStop; i++) {
-                    if (solution.getIntVal(positions.get(p).containers[i]) > 0) {
-                        System.out.print("cont(" + positions.get(p).number + "," + i + ") = " + solution.getIntVal(positions.get(p).containers[i]) + " ; ");
-                    } else {
-                        System.out.print("cont(" + positions.get(p).number + "," + i + ") = null ; ");
-                    }
+            for (int i = 0; i < nbStop; i++) {
+                System.out.printf("%s %d %s", "Étape", i, "--------------------------------\n");
+                int compteur = 0;
+                for (int b = 0; b < nbBay; b++) {
+                    compteur = printPiles(solution, printOrderedPos, i, compteur, true);
+                    printSeparator("---", " |");
+                    compteur = printPiles(solution, printOrderedPos, i, compteur, false);
+                    printSeparator("===", "==");
                 }
-                System.out.print("\n");
             }
             System.out.print("\n");
             for (int c = 0; c < navire.nbPosPan; c++) {
@@ -291,12 +294,52 @@ public class CSP {
         }
     }
 
-    private Position[] getDispOrderedPos(){
+    private int printPiles(Solution solution, Position[] printOrderedPos, int i, int compteur, Boolean isAbove) {
+        int pileLim; int posLim; int compt = compteur;
+        if (isAbove) {
+            pileLim = nbPileAbove;
+            posLim = nbPosAbove;
+        } else {
+            pileLim = nbPileUnder;
+            posLim = nbPosUnder;
+        }
+        for (int lu = 0; lu < posLim; lu++) {
+            for (int b = 0; b < nbBloc; b++) {
+                for (int p = 0; p < pileLim; p++) {
+                    System.out.printf("%3d", solution.getIntVal(printOrderedPos[compt].containers[i]));
+                    compt++;
+                }
+                System.out.printf(" %s", "|");
+            }
+            System.out.print("\n");
+        }
+        return compt;
+    }
+
+    private void printSeparator(String horizontalSeparator, String verticalSeparator){
+        for (int b = 0; b < nbBloc; b++) {
+            for (int p = 0; p < nbPileAbove; p++) {
+                System.out.print(horizontalSeparator);
+            }
+            System.out.print(verticalSeparator);
+        }
+        System.out.print("\n");
+    }
+
+    private Position[] getPrintOrderedPos(){
         Position[] pos = new Position[positions.size()];
-        int compteur = 0;
-//        for (int p = 0; p < (nbPileAbove + nbPileUnder) * nbBloc * nbBay; p++) {
-//            pos[compteur] = positions.get(p + nbP);
-//        }
+        int indexCompt = 0;
+        int posCompteur;
+        for (int b = 0; b < nbBay; b++) {
+            for (int l = nbPosAbove + nbPosUnder - 1; l >= 0; l--) {
+                posCompteur = b * nbBloc * (nbPileAbove * nbPosAbove + nbPileUnder * nbPosUnder) + l;
+                for (int p = 0; p < nbPileAbove * nbBloc; p++) {
+                    pos[indexCompt] = positions.get(posCompteur);
+                    posCompteur += nbPosAbove + nbPosUnder;
+                    indexCompt++;
+                }
+            }
+        }
         return pos;
     }
 }

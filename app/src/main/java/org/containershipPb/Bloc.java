@@ -19,14 +19,14 @@ public class Bloc {
         this.bay = bay;
         this.pileListAbove = new ArrayList<>();
         this.pileListUnder = new ArrayList<>();
+        this.panneau = new Position(null, numberPan, true, new IntVar[nbStop], this);
+        numberPan++;
+        panneaux.add(panneau);
         for (int i = 0; i < nbPilesUnder; i++) {
             this.pileListUnder.add(new Pile(nbPosUnder, this));
         }
         for (int i = 0; i < nbPileAbove; i++) {
             this.pileListAbove.add(new Pile(nbPosAbove, this));
         }
-        this.panneau = new Position(null, numberPan, true, new IntVar[nbStop], this);
-        numberPan++;
-        panneaux.add(panneau);
     }
 }

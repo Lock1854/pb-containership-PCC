@@ -1,5 +1,5 @@
+- Trouver le problème avec la contrainte de pile
 - Implémenter contrainte `forbidRestow`
-- Afficher la solution de manière plus lisible (en piles)
 - Essayer d'afficher la résolution du problème pour comprendre ce qui fonctionne mal
 - Revoir les tuples, car pas de solutions trouvées
 - Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
