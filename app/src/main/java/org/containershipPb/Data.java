@@ -51,16 +51,24 @@ public class Data {
 
     public int[] Load(int i){
         int[] T = new int[nbLoad(i)];
+        int index = 0;
         for (int c = 0; c < nbCont; c++) {
-            if (containers[i].load == i) T[c] = containers[i].number;
+            if (containers[c].load == i){
+                T[index] = containers[c].number;
+                index++;
+            }
         }
         return T;
     }
 
     public int[] Unload(int i){
         int[] T = new int[nbUnload(i)];
+        int index = 0;
         for (int c = 0; c < nbCont; c++) {
-            if (containers[i].unload == i) T[c] = containers[i].number;
+            if (containers[c].unload == i) {
+                T[index] = containers[c].number;
+                index++;
+            }
         }
         return T;
     }

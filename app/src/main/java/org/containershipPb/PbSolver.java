@@ -12,19 +12,19 @@ public class PbSolver {
 
     public static void main(String[] args) throws IOException {
         Model model = new Model("Chargement navire porte-container");
-        Navire navire = new Navire(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
+        Ship ship = new Ship(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
         Data data = new Data();
-        CSP csp = new CSP(model, navire, data, true, false);
+        CSP csp = new CSP(model, ship, data, false, false);
         csp.solve("print");
     }
 
     public PbSolver(){
         nbVar = 0;
-        Navire.numberPos = 0;
+        Ship.numberPos = 0;
         Model model = new Model("Chargement navire porte-container");
-        Navire navire = new Navire(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
+        Ship ship = new Ship(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
         Data data = new Data();
-        CSP csp = new CSP(model, navire, data, true, false);
+        CSP csp = new CSP(model, ship, data, true, false);
         csp.postContraints();
         nbVarSup = csp.model.getNbVars() - nbVar;
     }

@@ -2,7 +2,6 @@ package org.containershipPb;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 
-import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.nbCont;
 
 public class TupleGenerator {

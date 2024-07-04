@@ -1,4 +1,3 @@
-- Implémenter contrainte `forbidRestow`
 - Rendre plus efficace Load/NbLoad etc...
 - Revoir les tuples, car pas de solutions trouvées
 - Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
@@ -6,4 +5,3 @@
   - Mise en page
   - Étoffer chapitre *Présentation du problème*, notamment avec des schémas
   - Clarifier la modélisation en séparant celle mathématique et celle du CSP
-- enlever le projet de gitlab et le mettre sur github

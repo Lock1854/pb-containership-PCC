@@ -4,8 +4,8 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
 
-import static org.containershipPb.Navire.numberPos;
-import static org.containershipPb.Navire.positions;
+import static org.containershipPb.Ship.numberPos;
+import static org.containershipPb.Ship.positions;
 import static org.containershipPb.PbSolver.nbStop;
 
 public class Pile {

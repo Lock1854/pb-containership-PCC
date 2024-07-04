@@ -2,13 +2,13 @@ package org.containershipPb;
 
 import java.util.ArrayList;
 
-public class Navire {
+public class Ship {
     final int nbPos, nbPosPan, nbBay, nbBloc, nbPileAbove, nbPileUnder, hMaxUnder, hMaxAbove;
     ArrayList<Bay> bayList;
     static int numberPos = 0, numberPan;
-    static ArrayList<Position> positions, panneaux;
+    static ArrayList<Position> positions, hatches;
 
-    public Navire(int nbBay, int nbBloc, int nbPileAbove, int nbPileUnder, int nbPosAbove, int nbPosUnder){
+    public Ship(int nbBay, int nbBloc, int nbPileAbove, int nbPileUnder, int nbPosAbove, int nbPosUnder){
         this.nbBay = nbBay;
         this.nbBloc = nbBloc;
         this.nbPileAbove = nbPileAbove;
@@ -19,11 +19,12 @@ public class Navire {
         nbPosPan = computeNbPosPan();
         numberPan = nbPos;
         positions = new ArrayList<>();
-        panneaux = new ArrayList<>();
+        hatches = new ArrayList<>();
         ArrayList<Bay> baies = new ArrayList<>();
         for (int bay = 0; bay < nbBay; bay++) {
             baies.add(new Bay(nbBloc, nbPileAbove,nbPileUnder, nbPosAbove, nbPosUnder));
         }
+        positions.addAll(hatches);
         this.bayList = baies;
     }
 

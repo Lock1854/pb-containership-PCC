@@ -32,9 +32,13 @@ public class Position {
     public Position support(){
         if (isPanneau) return null;
         if (level == 0){
-            if (pile.bloc.pileListUnder.contains(pile)) return null;
-            return pile.bloc.panneau;
+            if (isUnder()) return null;
+            return pile.bloc.hatch;
         }
         else return pile.posList.get(level - 1);
+    }
+
+    public Boolean isUnder(){
+        return pile.bloc.pileListUnder.contains(pile);
     }
 }
