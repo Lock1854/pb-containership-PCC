@@ -5,22 +5,22 @@ import java.util.ArrayList;
 
 public class Position {
     Boolean isPanneau;
-    Integer hauteur;
+    Integer level;
     int number;
     Pile pile;
     Bloc bloc;
     IntVar[] containers;
 
-    public Position(Integer hauteur, int number, Boolean isPanneau, IntVar[] containers, Pile pile){
-        this.hauteur = hauteur;
+    public Position(Integer level, int number, Boolean isPanneau, IntVar[] containers, Pile pile){
+        this.level = level;
         this.isPanneau = isPanneau;
         this.containers = containers;
         this.number = number;
         this.pile = pile;
     }
 
-    public Position(Integer hauteur, int number, Boolean isPanneau, IntVar[] containers, Bloc bloc){
-        this.hauteur = hauteur;
+    public Position(Integer level, int number, Boolean isPanneau, IntVar[] containers, Bloc bloc){
+        this.level = level;
         this.isPanneau = isPanneau;
         this.containers = containers;
         this.number = number;
@@ -29,11 +29,11 @@ public class Position {
 
     public Position support(){
         if (isPanneau) return null;
-        if (hauteur == 0){
+        if (level == 0){
             if (pile.bloc.pileListUnder.contains(pile)) return null;
-            else return pile.bloc.panneau;
+            return pile.bloc.panneau;
         }
-        else return pile.posList.get(hauteur - 1);
+        else return pile.posList.get(level - 1);
     }
 
     public ArrayList<Position> bloquant(){
@@ -43,11 +43,11 @@ public class Position {
                 L.add(pile.posList.getFirst());
             }
         } else if (pile.bloc.pileListAbove.contains(pile)){
-            if (hauteur == pile.hauteur - 1) return null;
-            else L.add(pile.posList.get(hauteur + 1));
+            if (level == pile.hauteur - 1) return null;
+            else L.add(pile.posList.get(level + 1));
         } else {
             L.add(pile.bloc.panneau);
-            if (hauteur != pile.hauteur - 1) L.add(pile.posList.get(hauteur + 1));
+            if (level != pile.hauteur - 1) L.add(pile.posList.get(level + 1));
         }
         return L;
     }

@@ -3,8 +3,15 @@ package org.containershipPb;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.propagation.PropagationProfiler;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.containershipPb.Navire.positions;
 import static org.containershipPb.PbSolver.*;
@@ -18,6 +25,7 @@ public class CSP {
     IntVar restowTot;
     Boolean restowAllowed, table;
     TupleGenerator tupleGen;
+    ArrayList<IntVar> allIntVar = new ArrayList<>();
 
     public CSP(Model model, Navire navire, Data data, Boolean restowAllowed, Boolean table){
         this.model = model;
@@ -25,21 +33,30 @@ public class CSP {
         this.data = data;
         this.restowAllowed = restowAllowed;
         this.table = table;
+        initialiseContVar();
         move = model.intVarMatrix("move", navire.nbPosPan, nbStop, 0, 2, false);
+        allIntVar.addAll(getAllMove());
         nbVar += navire.nbPosPan * nbStop;
         if (restowAllowed) {
-            restow = model.intVarArray("restow", nbStop, 0, navire.nbPosPan);
-            restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan);
+            restow = model.intVarArray("restow", nbStop, 0, 0, false);
+            allIntVar.addAll(Arrays.stream(restow).toList());
+            restowTot = model.intVar("restowTot", 0, nbStop * navire.nbPosPan, false);
+            allIntVar.add(restowTot);
             nbVar += nbStop + 1;
         }
         if (table) tupleGen = new TupleGenerator(data);
-        initialisePosVar();
     }
 
     public void solve(String usageSolution) {
         postContraints();
-        model.getSolver().showStatistics();
         Solver solver = model.getSolver();
+        solver.showStatistics();
+        solver.observePropagation(new PropagationProfiler(model));
+        solver.setSearch(new IntStrategy(
+                allIntVar.toArray(new IntVar[0]),
+                new InputOrder<>(model),
+                new IntDomainMin()
+        ));
         if (usageSolution.equals("show")) solver.showSolutions();
         Solution solution = restowAllowed? model.getSolver().findOptimalSolution(restowTot, false)
                 : solver.findSolution();
@@ -99,7 +116,7 @@ public class CSP {
                         tupleGen.getMovePos(false, true)
                 ).post();
             }
-            if (pos.pile.bloc.pileListUnder.contains(pos.pile)) {
+            if (!pos.isPanneau && pos.pile.bloc.pileListUnder.contains(pos.pile)) {
                 model.table(
                         new IntVar[]{move[pos.number][i], move[pos.pile.bloc.panneau.number][i]},
                         tupleGen.getMovePan()
@@ -205,18 +222,20 @@ public class CSP {
 //        }
 //    }
 
-    private void initialisePosVar(){
+    private void initialiseContVar(){
         for (Position pos : positions){
             if (pos.isPanneau){
                 for (int i = 0; i < nbStop; i++) {
                     pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", new int[]{- pos.number});
                     nbVar++;
+                    allIntVar.add(pos.containers[i]);
                 }
             }
             else {
                 for (int i = 0; i < nbStop; i++) {
                     pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", data.onboardContsNo(i, pos));
                     nbVar++;
+                    allIntVar.add(pos.containers[i]);
                 }
             }
         }
@@ -230,6 +249,16 @@ public class CSP {
             compteur++;
         }
         return vars;
+    }
+
+    private ArrayList<IntVar> getAllMove(){
+        ArrayList<IntVar> L = new ArrayList<>();
+        for (int i = 0; i < nbStop; i++) {
+            for (int p = 0; p < positions.size(); p++) {
+                L.add(move[p][i]);
+            }
+        }
+        return L;
     }
 
     private void printSolution(Solution solution){
@@ -260,5 +289,14 @@ public class CSP {
                 }
             }
         }
+    }
+
+    private Position[] getDispOrderedPos(){
+        Position[] pos = new Position[positions.size()];
+        int compteur = 0;
+//        for (int p = 0; p < (nbPileAbove + nbPileUnder) * nbBloc * nbBay; p++) {
+//            pos[compteur] = positions.get(p + nbP);
+//        }
+        return pos;
     }
 }
