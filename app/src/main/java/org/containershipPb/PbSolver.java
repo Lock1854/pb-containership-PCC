@@ -2,15 +2,13 @@ package org.containershipPb;
 
 import org.chocosolver.solver.Model;
 
-import java.io.IOException;
-
 
 public class PbSolver {
-    static int nbCont = 4, nbStop = 4, nbBay = 1, nbBloc = 1, nbPileAbove = 2, nbPileUnder = 0, nbPosAbove = 3, nbPosUnder = 0;
+    static int nbCont = 8, nbStop = 4, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 0, nbPosAbove = 2, nbPosUnder = 0;
     static int nbVar = 0;
     int nbVarSup;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         Model model = new Model("Chargement navire porte-container");
         Ship ship = new Ship(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
         Data data = new Data();

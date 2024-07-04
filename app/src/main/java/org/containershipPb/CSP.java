@@ -38,7 +38,7 @@ public class CSP {
         allIntVar.addAll(getAllMove());
         nbVar += ship.nbPosPan * nbStop;
         if (restowAllowed) {
-            restow = model.intVarArray("restow", nbStop, 0, 0, false);
+            restow = model.intVarArray("restow", nbStop, 0, 2, false);
             allIntVar.addAll(Arrays.stream(restow).toList());
             restowTot = model.intVar("restowTot", 0, nbStop * ship.nbPosPan, false);
             allIntVar.add(restowTot);
@@ -90,7 +90,7 @@ public class CSP {
     private void ensureStack(Position pos, int i){
         if (pos.support != null && !pos.support.isPanneau) {
             if (table){
-                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getPile(pos)).post();
+                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getStackTuple(pos)).post();
             } else {
                 model.ifThen(
                         model.arithm(pos.containers[i], "!=", - pos.number),
@@ -105,23 +105,23 @@ public class CSP {
             if (i == nbStop - 1) {
                 model.table(
                         new IntVar[]{pos.containers[i], move[pos.number][i]},
-                        tupleGen.getMovePos(true, false)
+                        tupleGen.getMovePosTuple(pos, true)
                 ).post();
             } else if (pos.support == null){
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], model.intVar(0)},
-                        tupleGen.getMovePos(false, false)
+                        tupleGen.getMovePosTuple(pos, false)
                 ).post();
             } else {
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support.number][i]},
-                        tupleGen.getMovePos(false, true)
+                        tupleGen.getMovePosTuple(pos, false)
                 ).post();
             }
-            if (!pos.isPanneau && pos.pile.bloc.pileListUnder.contains(pos.pile)) {
+            if (!pos.isPanneau && pos.isUnder()) {
                 model.table(
                         new IntVar[]{move[pos.number][i], move[pos.pile.bloc.hatch.number][i]},
-                        tupleGen.getMovePan()
+                        tupleGen.getMovePanTuple()
                 ).post();
             }
         }
