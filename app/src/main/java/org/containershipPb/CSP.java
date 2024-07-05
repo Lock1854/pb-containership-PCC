@@ -1,6 +1,5 @@
 package org.containershipPb;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.propagation.PropagationProfiler;
@@ -17,9 +16,6 @@ import static org.containershipPb.Ship.positions;
 import static org.containershipPb.PbSolver.*;
 
 public class CSP {
-    Model model;
-    Ship ship;
-    Data data;
     IntVar[][] move;
     IntVar[] restow;
     IntVar restowTot;
@@ -27,10 +23,7 @@ public class CSP {
     TupleGenerator tupleGen;
     ArrayList<IntVar> allIntVar = new ArrayList<>();
 
-    public CSP(Model model, Ship ship, Data data, Boolean restowAllowed, Boolean table){
-        this.model = model;
-        this.ship = ship;
-        this.data = data;
+    public CSP(Boolean restowAllowed, Boolean table){
         this.restowAllowed = restowAllowed;
         this.table = table;
         initialiseContVar();
@@ -44,7 +37,7 @@ public class CSP {
             allIntVar.add(restowTot);
             nbVar += nbStop + 1;
         }
-        if (table) tupleGen = new TupleGenerator(data);
+        if (table) tupleGen = new TupleGenerator();
     }
 
     public void solve(String usageSolution) {
@@ -83,7 +76,7 @@ public class CSP {
     }
 
     private void ensureAllTransported(int i){
-        IntVar[] t = model.intVarArray(data.onboardConts[i].size(), new int[]{1});
+        IntVar[] t = model.intVarArray(data.onboardConts.get(i).size(), new int[]{1});
         model.globalCardinality(getAllContent(i), data.onboardContsNo(i), t, false).post();
     }
 
@@ -227,7 +220,14 @@ public class CSP {
                     ),
                     model.member(pos.containers[i+1], data.Load(i))
             );
+            model.ifThen(
+                    model.arithm(pos.containers[i], "=", pos.containers[i+1]),
+                    model.arithm(move[pos.number][i], "=", 0)
+            );
         }
+    }
+
+    private void breakSymmetryInStack(Position pos1, Position pos2, int i){
     }
 
     private void initialiseContVar(){
@@ -312,10 +312,10 @@ public class CSP {
         for (int lu = 0; lu < posLim; lu++) {
             for (int b = 0; b < nbBloc; b++) {
                 for (int p = 0; p < pileLim; p++) {
-                    if (solution.getIntVal(printOrderedPos[compt].containers[i]) == 0) {
-                        System.out.printf("  %s%d", "-", 0);
+                    if ( i == nbStop - 1 || solution.getIntVal(printOrderedPos[compt].containers[i+1]) <= 0) {
+                        System.out.printf("%4s", ".");
                     } else {
-                        System.out.printf("%4d", solution.getIntVal(printOrderedPos[compt].containers[i]));
+                        System.out.printf("%4d", solution.getIntVal(printOrderedPos[compt].containers[i+1]));
                     }
                     compt++;
                 }

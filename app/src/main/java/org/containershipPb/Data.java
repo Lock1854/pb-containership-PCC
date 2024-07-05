@@ -1,25 +1,40 @@
 package org.containershipPb;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
-import static org.containershipPb.PbSolver.nbCont;
-import static org.containershipPb.PbSolver.nbStop;
+import static org.containershipPb.PbSolver.*;
 
 public class Data {
-    static Container[] containers;
-    int[][] planification;
-    ArrayList<Container>[] onboardConts;
+    static ArrayList<Container> containers;
+    ArrayList<Integer[]> types;
+    ArrayList<ArrayList<Container>> onboardConts;
+    int maxTries = 10;
+    static Random random = new Random();
+    int numberTypes = 4;
+    int minTypeLength = 3;
 
     public Data(){
-        this.planification = generatePlannification(3);
-        System.out.println(Arrays.deepToString(this.planification));
-        containers = buildConts();
-        onboardConts = new ArrayList[nbStop];
-        for (int i = 0; i < nbStop; i++) {
-            onboardConts[i] = onboardConts(i);
-        }
+        onboardConts = new ArrayList<>(nbStop);
+        int step;
+        if (seed != -1) maxTries = 1;
+        do {
+            this.types = generateTypes();
+            containers = buildConts();
+            onboardConts.clear();
+            step = 0;
+            while (step < nbStop) {
+                ArrayList<Container> list = onboardConts(step);
+                if (list.size() > ship.nbPos) break;
+                onboardConts.add(list);
+                step++;
+            }
+            if (step < nbStop) {
+                if (--maxTries <= 0) System.exit(0);
+                seed = -1;
+            }
+        } while (step < nbStop);
+        printPlanification();
     }
 
     private ArrayList<Container> onboardConts(int i){
@@ -31,7 +46,7 @@ public class Data {
     }
 
     public int[] onboardContsNo(int i, Position pos){
-        ArrayList<Container> L = onboardConts[i];
+        ArrayList<Container> L = onboardConts.get(i);
         int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
@@ -41,7 +56,7 @@ public class Data {
     }
 
     public int[] onboardContsNo(int i){
-        ArrayList<Container> L = onboardConts[i];
+        ArrayList<Container> L = onboardConts.get(i);
         int[] T = new int[L.size()];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
@@ -52,10 +67,11 @@ public class Data {
     public int[] Load(int i){
         int[] T = new int[nbLoad(i)];
         int index = 0;
-        for (int c = 0; c < nbCont; c++) {
-            if (containers[c].load == i){
-                T[index] = containers[c].number;
+        for (Container cont : containers) {
+            if (cont.load == i){
+                T[index] = cont.number;
                 index++;
+                if (index == nbLoad(i)) break;
             }
         }
         return T;
@@ -64,10 +80,11 @@ public class Data {
     public int[] Unload(int i){
         int[] T = new int[nbUnload(i)];
         int index = 0;
-        for (int c = 0; c < nbCont; c++) {
-            if (containers[c].unload == i) {
-                T[index] = containers[c].number;
+        for (Container cont : containers) {
+            if (cont.unload == i) {
+                T[index] = cont.number;
                 index++;
+                if (index == nbUnload(i)) break;
             }
         }
         return T;
@@ -83,40 +100,57 @@ public class Data {
 
     public int nbUnload(int i){
         int n = 0;
-        for (Container cont : onboardConts[i]){
+        for (Container cont : containers){
             if (cont.unload == i) n++;
         }
         return n;
     }
 
-    private Container[] buildConts(){
-        Container[] t = new Container[nbCont];
+    public int[] getContsNoTyped(int t){
+        ArrayList<Integer> L = new  ArrayList<>();
+        for (Container cont : containers){
+            if (cont.type == t) L.add(cont.number);
+        }
+        int[] T = new int[L.size()];
+        for (int c = 0; c < L.size(); c++) {
+            T[c] = L.get(c);
+        }
+        return T;
+    }
+
+    private ArrayList<Container> buildConts(){
+        ArrayList<Container> l = new ArrayList<>(nbCont);
         for (int c = 0; c <nbCont; c++) {
-            t[c] = new Container(planification[c][0], planification[c][1], c+1);
+            int randomTypeIndex = random.nextInt(numberTypes);
+            l.add(new Container(types.get(randomTypeIndex)[0], types.get(randomTypeIndex)[1], randomTypeIndex, c+1));
         }
-        return t;
+        return l;
     }
 
-    private int[][] generatePlannification(int numberTypes){
-        int[][] t = new int[nbCont][2];
-        Random random = new Random();
-        int compt = 0;
-        int[] pair = null;
-        for (int c = 0; c < nbCont; c++) {
-            if (compt == 0 && c != nbCont - 1) pair = generateValidPair(random);
-            t[c] = pair;
-            if (compt == nbCont / numberTypes - 1) compt = 0;
-            else compt++;
+    static int seed = -1;
+    private ArrayList<Integer[]> generateTypes(){
+        ArrayList<Integer[]> l = new ArrayList<>(numberTypes);
+        if (seed == -1) seed = Math.abs(random.nextInt());
+        System.out.printf("seed = %d\n", seed);
+        random.setSeed(seed);
+        for (int j = 0; j < numberTypes; j++) {
+            l.add(generateValidPair());
         }
-        return t;
+        return l;
     }
 
-    private int[] generateValidPair(Random random) {
+    private Integer[] generateValidPair() {
         int first, second;
         do {
             first = random.nextInt(nbStop);
             second = random.nextInt(nbStop);
-        } while (first >= second);
-        return new int[]{first, second};
+        } while (first >= second || second - first < minTypeLength);
+        return new Integer[]{first, second};
+    }
+
+    private void printPlanification(){
+        for (Container cont : containers) {
+            System.out.printf("cont %d : [%d, %d]\n", cont.number, cont.load, cont.unload);
+        }
     }
 }

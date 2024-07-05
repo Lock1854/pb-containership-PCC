@@ -5,10 +5,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import static org.containershipPb.PbSolver.nbCont;
 
 public class TupleGenerator {
-    Data data;
 
-    public TupleGenerator(Data data){
-        this.data = data;
+    public TupleGenerator(){
     }
 
     public Tuples getMovePosTuple(Position pos, Boolean lastStep){

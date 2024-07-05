@@ -1,5 +1,7 @@
-- Rendre plus efficace Load/NbLoad etc...
-- Revoir les tuples, car pas de solutions trouvées
+- Ajouter constraintes pour briser symmétries
+  - symétrie des containers dans la pile
+  - symétries des piles
+- Faire tuples pour la contrainte `forbidRestow`
 - Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
 - Continuer à rédiger le rapport
   - Mise en page
