@@ -2,11 +2,38 @@ package org.containershipPb;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 
-import static org.containershipPb.PbSolver.nbCont;
+import static org.containershipPb.PbSolver.*;
 
 public class TupleGenerator {
 
     public TupleGenerator(){
+    }
+
+    static int compteur = 8;
+    static boolean show = true;
+    public Tuples getContPosEquiv(Container cont, Position pos, int i){
+        Tuples t = new Tuples(true);
+        for (int p = cont.positions[i].getLB(); p <= cont.positions[i].getUB(); p++) {
+            for (int c : data.onboardContsNo(i)) {
+                if ((c != cont.number && p != pos.number) || (c == cont.number && p == pos.number)){
+                    t.add(c,p);
+                    if (compteur == 7) System.out.printf("%d, %d\n", c, p);
+                }
+            }
+            for (int q = cont.positions[i].getLB(); q <= cont.positions[i].getUB(); q++) {
+                if (q != p) t.add(-q,p);
+            }
+        }
+        if (show) {
+            System.out.println(
+                    "Position : " + pos.number + "\n"
+                            + "Container : " + cont.number + "\n"
+                            + t
+            );
+            show = false;
+        }
+        compteur++;
+        return t;
     }
 
     public Tuples getMovePosTuple(Position pos, Boolean lastStep){

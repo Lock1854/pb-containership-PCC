@@ -3,7 +3,7 @@ package org.containershipPb;
 import org.chocosolver.solver.variables.IntVar;
 
 public class Position {
-    Boolean isPanneau;
+    Boolean isHatch;
     Integer level;
     int number;
     Pile pile;
@@ -11,18 +11,18 @@ public class Position {
     IntVar[] containers;
     Position support;
 
-    public Position(Integer level, int number, Boolean isPanneau, IntVar[] containers, Pile pile){
+    public Position(Integer level, int number, Boolean isHatch, IntVar[] containers, Pile pile){
         this.level = level;
-        this.isPanneau = isPanneau;
+        this.isHatch = isHatch;
         this.containers = containers;
         this.number = number;
         this.pile = pile;
         this.support = support();
     }
 
-    public Position(Integer level, int number, Boolean isPanneau, IntVar[] containers, Bloc bloc){
+    public Position(Integer level, int number, Boolean isHatch, IntVar[] containers, Bloc bloc){
         this.level = level;
-        this.isPanneau = isPanneau;
+        this.isHatch = isHatch;
         this.containers = containers;
         this.number = number;
         this.bloc = bloc;
@@ -30,7 +30,7 @@ public class Position {
     }
 
     public Position support(){
-        if (isPanneau) return null;
+        if (isHatch) return null;
         if (level == 0){
             if (isUnder()) return null;
             return pile.bloc.hatch;

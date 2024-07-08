@@ -4,6 +4,5 @@
 - Faire tuples pour la contrainte `forbidRestow`
 - Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
 - Continuer à rédiger le rapport
-  - Mise en page
-  - Étoffer chapitre *Présentation du problème*, notamment avec des schémas
-  - Clarifier la modélisation en séparant celle mathématique et celle du CSP
+  - Organiser la partie *Implémentation*
+  - Rédiger la partie *Résultats et Analyse* (exemple, données du code etc...)

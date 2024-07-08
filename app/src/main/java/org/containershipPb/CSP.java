@@ -12,6 +12,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static org.containershipPb.Data.containers;
 import static org.containershipPb.Ship.positions;
 import static org.containershipPb.PbSolver.*;
 
@@ -22,11 +23,13 @@ public class CSP {
     Boolean restowAllowed, table;
     TupleGenerator tupleGen;
     ArrayList<IntVar> allIntVar = new ArrayList<>();
+    Boolean testSymmetry = true;
 
     public CSP(Boolean restowAllowed, Boolean table){
         this.restowAllowed = restowAllowed;
         this.table = table;
         initialiseContVar();
+        if (testSymmetry) initialisePosVar();
         move = model.intVarMatrix("move", ship.nbPosPan, nbStop, 0, 2, false);
         allIntVar.addAll(getAllMove());
         nbVar += ship.nbPosPan * nbStop;
@@ -37,7 +40,7 @@ public class CSP {
             allIntVar.add(restowTot);
             nbVar += nbStop + 1;
         }
-        if (table) tupleGen = new TupleGenerator();
+        tupleGen = new TupleGenerator();
     }
 
     public void solve(String usageSolution) {
@@ -67,7 +70,33 @@ public class CSP {
                 ensureStack(pos, i);
                 computeMove(pos, i);
                 if (!restowAllowed) forbidRestow(pos, i);
+                if (testSymmetry && !pos.isHatch) {
+                    for (Container cont : containers) {
+                        if (i > cont.load && i <= cont.unload) {
+                            makePosContEquiv(cont, pos, i);
+                        }
+                    }
+                }
             }
+            if (testSymmetry) {
+                for (Type type : data.types) {
+                    if (i > type.load && i <= type.unload) {
+                        for (int c = 0; c < type.containers.size() - 1; c++) {
+                            breakSymmetryInStack(type.containers.get(c), type.containers.get(c + 1), i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void makePosContEquiv(Container cont, Position pos, int i){
+        if (table) model.table(pos.containers[i], cont.positions[i], tupleGen.getContPosEquiv(cont, pos, i)).post();
+        else{
+            model.ifOnlyIf(
+                    model.arithm(cont.positions[i], "=", pos.number),
+                    model.arithm(pos.containers[i], "=", cont.number)
+            );
         }
     }
 
@@ -81,7 +110,7 @@ public class CSP {
     }
 
     private void ensureStack(Position pos, int i){
-        if (pos.support != null && !pos.support.isPanneau) {
+        if (pos.support != null && !pos.support.isHatch) {
             if (table){
                 model.table(pos.containers[i], pos.support.containers[i], tupleGen.getStackTuple(pos)).post();
             } else {
@@ -94,7 +123,7 @@ public class CSP {
     }
 
     private void computeMove(Position pos, int i){
-        if (table && !pos.isPanneau) {
+        if (table && !pos.isHatch) {
             if (i == nbStop - 1) {
                 model.table(
                         new IntVar[]{pos.containers[i], move[pos.number][i]},
@@ -111,14 +140,14 @@ public class CSP {
                         tupleGen.getMovePosTuple(pos, false)
                 ).post();
             }
-            if (!pos.isPanneau && pos.isUnder()) {
+            if (!pos.isHatch && pos.isUnder()) {
                 model.table(
                         new IntVar[]{move[pos.number][i], move[pos.pile.bloc.hatch.number][i]},
                         tupleGen.getMovePanTuple()
                 ).post();
             }
         }
-        else if (!pos.isPanneau){
+        else if (!pos.isHatch){
             if (i == nbStop - 1) {
                 // cas de la dernière étape
                 model.ifThenElse(
@@ -205,7 +234,7 @@ public class CSP {
     }
 
     private void forbidRestow(Position pos, int i) {
-        if (i < nbStop - 1) {
+        if (i < nbStop - 1 && !pos.isHatch) {
             model.ifThen(
                     model.and(
                             model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
@@ -227,12 +256,14 @@ public class CSP {
         }
     }
 
-    private void breakSymmetryInStack(Position pos1, Position pos2, int i){
+    private void breakSymmetryInStack(Container cont1, Container cont2, int i){
+        System.out.printf("étape : %d\n cont1 : %s\n cont2 : %s\n", i, cont1.toString(), cont2);
+        model.arithm(cont1.positions[i], "<", cont2.positions[i]).post();
     }
 
     private void initialiseContVar(){
         for (Position pos : positions){
-            if (pos.isPanneau){
+            if (pos.isHatch){
                 for (int i = 0; i < nbStop; i++) {
                     pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", new int[]{- pos.number});
                     nbVar++;
@@ -241,10 +272,21 @@ public class CSP {
             }
             else {
                 for (int i = 0; i < nbStop; i++) {
-                    pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", data.onboardContsNo(i, pos));
+                    pos.containers[i] = model.intVar("cont[" + pos.number + "][" + i + "]", data.onboardContsNo(i, pos.number));
                     nbVar++;
                     allIntVar.add(pos.containers[i]);
                 }
+            }
+        }
+    }
+
+    private void initialisePosVar(){
+        for (Container cont : containers){
+            for (int i = 0; i < nbStop; i++) {
+                if (i > cont.load && i <= cont.unload) {
+                    cont.positions[i] = model.intVar("position[" + cont.number + "][" + i + "]", 0, ship.nbPos - 1);
+                    nbVar++;
+                } else cont.positions[i] = null;
             }
         }
     }
@@ -272,7 +314,7 @@ public class CSP {
     private void printSolution(Solution solution){
         if(solution == null) System.out.println("No solution found");
         else {
-            Position[] printOrderedPos = getPrintOrderedPos();
+            ArrayList<Position> printOrderedPos = getPrintOrderedPos();
             System.out.print("\n");
             for (int i = 0; i < nbStop; i++) {
                 System.out.printf("%s %d %s", "Étape", i, "--------------------------------\n");
@@ -300,7 +342,7 @@ public class CSP {
         }
     }
 
-    private int printPiles(Solution solution, Position[] printOrderedPos, int i, int compteur, Boolean isAbove) {
+    private int printPiles(Solution solution, ArrayList<Position> printOrderedPos, int i, int compteur, Boolean isAbove) {
         int pileLim; int posLim; int compt = compteur;
         if (isAbove) {
             pileLim = nbPileAbove;
@@ -312,10 +354,10 @@ public class CSP {
         for (int lu = 0; lu < posLim; lu++) {
             for (int b = 0; b < nbBloc; b++) {
                 for (int p = 0; p < pileLim; p++) {
-                    if ( i == nbStop - 1 || solution.getIntVal(printOrderedPos[compt].containers[i+1]) <= 0) {
+                    if ( i == nbStop - 1 || solution.getIntVal(printOrderedPos.get(compt).containers[i+1]) <= 0) {
                         System.out.printf("%4s", ".");
                     } else {
-                        System.out.printf("%4d", solution.getIntVal(printOrderedPos[compt].containers[i+1]));
+                        System.out.printf("%4d", solution.getIntVal(printOrderedPos.get(compt).containers[i+1]));
                     }
                     compt++;
                 }
@@ -336,18 +378,34 @@ public class CSP {
         System.out.print("\n");
     }
 
-    private Position[] getPrintOrderedPos(){
-        Position[] pos = new Position[positions.size()];
-        int indexCompt = 0;
-        int posCompteur;
+    private ArrayList<Position> getPrintOrderedPos(){
+        ArrayList<Position> pos = new ArrayList<>(positions.size());
         for (int b = 0; b < nbBay; b++) {
-            for (int l = nbPosAbove + nbPosUnder - 1; l >= 0; l--) {
-                posCompteur = b * nbBloc * (nbPileAbove * nbPosAbove + nbPileUnder * nbPosUnder) + l;
-                for (int p = 0; p < nbPileAbove * nbBloc; p++) {
-                    pos[indexCompt] = positions.get(posCompteur);
-                    posCompteur += nbPosAbove + nbPosUnder;
-                    indexCompt++;
-                }
+            pos.addAll(getHalfBayOrderedPos(b, false));
+            pos.addAll(getHalfBayOrderedPos(b, true));
+        }
+        return pos;
+    }
+
+    static int posCompteur;
+    private ArrayList<Position> getHalfBayOrderedPos(int b, Boolean under){
+        ArrayList<Position> pos = new ArrayList<>(positions.size());
+        int limPos;
+        int limPile;
+        if (under) {
+            limPos = nbPosUnder;
+            limPile = nbPileUnder;
+        }
+        else {
+            limPos = nbPosAbove;
+            limPile = nbPileAbove;
+        }
+        for (int l = limPos - 1; l >= 0; l--) {
+            posCompteur = b * nbBloc * (nbPileAbove * nbPosAbove + nbPileUnder * nbPosUnder) + l;
+            if (!under) posCompteur += (nbPileUnder * nbPosUnder);
+            for (int p = 0; p < limPile * nbBloc; p++) {
+                pos.add(positions.get(posCompteur));
+                posCompteur += limPos;
             }
         }
         return pos;

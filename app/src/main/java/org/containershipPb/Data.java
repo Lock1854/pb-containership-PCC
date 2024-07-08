@@ -7,7 +7,7 @@ import static org.containershipPb.PbSolver.*;
 
 public class Data {
     static ArrayList<Container> containers;
-    ArrayList<Integer[]> types;
+    ArrayList<Type> types;
     ArrayList<ArrayList<Container>> onboardConts;
     int maxTries = 10;
     static Random random = new Random();
@@ -45,13 +45,13 @@ public class Data {
         return L;
     }
 
-    public int[] onboardContsNo(int i, Position pos){
+    public int[] onboardContsNo(int i, int p){
         ArrayList<Container> L = onboardConts.get(i);
         int[] T = new int[L.size() + 1];
         for (int j = 0; j < L.size(); j++) {
             T[j] = L.get(j).number;
         }
-        T[L.size()] = - pos.number;
+        T[L.size()] = - p;
         return T;
     }
 
@@ -106,46 +106,38 @@ public class Data {
         return n;
     }
 
-    public int[] getContsNoTyped(int t){
-        ArrayList<Integer> L = new  ArrayList<>();
-        for (Container cont : containers){
-            if (cont.type == t) L.add(cont.number);
-        }
-        int[] T = new int[L.size()];
-        for (int c = 0; c < L.size(); c++) {
-            T[c] = L.get(c);
-        }
-        return T;
-    }
-
     private ArrayList<Container> buildConts(){
         ArrayList<Container> l = new ArrayList<>(nbCont);
         for (int c = 0; c <nbCont; c++) {
-            int randomTypeIndex = random.nextInt(numberTypes);
-            l.add(new Container(types.get(randomTypeIndex)[0], types.get(randomTypeIndex)[1], randomTypeIndex, c+1));
+            Type type = types.get(random.nextInt(numberTypes));
+            Container cont = new Container(type, c+1);
+            l.add(cont);
+            type.containers.add(cont);
         }
         return l;
     }
 
     static int seed = -1;
-    private ArrayList<Integer[]> generateTypes(){
-        ArrayList<Integer[]> l = new ArrayList<>(numberTypes);
+    private ArrayList<Type> generateTypes(){
+        ArrayList<Type> l = new ArrayList<>(numberTypes);
         if (seed == -1) seed = Math.abs(random.nextInt());
         System.out.printf("seed = %d\n", seed);
         random.setSeed(seed);
         for (int j = 0; j < numberTypes; j++) {
-            l.add(generateValidPair());
+            l.add(generateValidType());
         }
         return l;
     }
 
-    private Integer[] generateValidPair() {
+    static int nbTypes = 0;
+    private Type generateValidType() {
         int first, second;
         do {
             first = random.nextInt(nbStop);
             second = random.nextInt(nbStop);
         } while (first >= second || second - first < minTypeLength);
-        return new Integer[]{first, second};
+        nbTypes++;
+        return new Type(first, second, nbTypes-1);
     }
 
     private void printPlanification(){
