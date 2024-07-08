@@ -35,7 +35,7 @@ public class CSP {
         allIntVar.addAll(getAllMove());
         nbVar += ship.nbPosPan * nbStop;
         if (restowAllowed) {
-            restow = model.intVarArray("restow", nbStop, 0, 2, false);
+            restow = model.intVarArray("restow", nbStop, 0, 5, false);
             allIntVar.addAll(Arrays.stream(restow).toList());
             restowTot = model.intVar("restowTot", 0, nbStop * ship.nbPosPan, false);
             allIntVar.add(restowTot);
