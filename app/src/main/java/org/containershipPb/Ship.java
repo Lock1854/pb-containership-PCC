@@ -7,6 +7,7 @@ public class Ship {
     ArrayList<Bay> bayList;
     static int numberPos = 0, numberPan;
     static ArrayList<Position> positions, hatches;
+    static ArrayList<ArrayList<Position>> halfBlocs;
 
     public Ship(int nbBay, int nbBloc, int nbPileAbove, int nbPileUnder, int nbPosAbove, int nbPosUnder){
         this.nbBay = nbBay;
@@ -20,6 +21,7 @@ public class Ship {
         numberPan = nbPos;
         positions = new ArrayList<>();
         hatches = new ArrayList<>();
+        halfBlocs = new ArrayList<>();
         ArrayList<Bay> baies = new ArrayList<>();
         for (int bay = 0; bay < nbBay; bay++) {
             baies.add(new Bay(nbBloc, nbPileAbove,nbPileUnder, nbPosAbove, nbPosUnder));

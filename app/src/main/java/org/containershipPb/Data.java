@@ -34,7 +34,6 @@ public class Data {
                 seed = -1;
             }
         } while (step < nbStop);
-        printPlanification();
     }
 
     private ArrayList<Container> onboardConts(int i){
@@ -138,11 +137,5 @@ public class Data {
         } while (first >= second || second - first < minTypeLength);
         nbTypes++;
         return new Type(first, second, nbTypes-1);
-    }
-
-    private void printPlanification(){
-        for (Container cont : containers) {
-            System.out.printf("cont %d : [%d, %d]\n", cont.number, cont.load, cont.unload);
-        }
     }
 }

@@ -4,7 +4,7 @@ import org.chocosolver.solver.Model;
 
 
 public class PbSolver {
-    static int nbCont = 16, nbStop = 12, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 0, nbPosAbove = 4, nbPosUnder = 0;
+    static int nbCont = 16, nbStop = 12, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 2, nbPosUnder = 2;
     static int nbVar = 0;
     int nbVarSup;
     static Ship ship;
@@ -15,6 +15,9 @@ public class PbSolver {
         model = new Model("Chargement navire porte-container");
         ship = new Ship(nbBay, nbBloc, nbPileAbove, nbPileUnder, nbPosAbove, nbPosUnder);
         data = new Data();
+        for (Type type : data.types) {
+            System.out.println(type);
+        }
         CSP csp = new CSP(false, true);
         csp.solve("print");
     }

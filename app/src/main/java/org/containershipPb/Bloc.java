@@ -12,6 +12,7 @@ public class Bloc {
     ArrayList<Pile> pileListAbove, pileListUnder;
     Position hatch;
     Bay bay;
+    ArrayList<Position> bottomPosUnder, bottomPosAbove;
 
     public Bloc(int nbPileAbove, int nbPilesUnder, int nbPosAbove, int nbPosUnder, Bay bay){
         this.nbPilesAbove = nbPileAbove;
@@ -20,13 +21,15 @@ public class Bloc {
         this.pileListAbove = new ArrayList<>();
         this.pileListUnder = new ArrayList<>();
         this.hatch = new Position(null, numberPan, true, new IntVar[nbStop], this);
+        this.bottomPosUnder = new ArrayList<>();
+        this.bottomPosAbove = new ArrayList<>();
         numberPan++;
         hatches.add(hatch);
         for (int i = 0; i < nbPilesUnder; i++) {
-            this.pileListUnder.add(new Pile(nbPosUnder, this));
+            this.pileListUnder.add(new Pile(nbPosUnder, this, true));
         }
         for (int i = 0; i < nbPileAbove; i++) {
-            this.pileListAbove.add(new Pile(nbPosAbove, this));
+            this.pileListAbove.add(new Pile(nbPosAbove, this, false));
         }
     }
 }

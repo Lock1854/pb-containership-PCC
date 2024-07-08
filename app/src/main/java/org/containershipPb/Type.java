@@ -12,4 +12,9 @@ public class Type {
         this.num = num;
         this.containers = new ArrayList<>();
     }
+
+    @Override
+    public String toString() {
+        return "type " + num + " : " + load + " - " + unload + " → " + containers.size() + " container" + (containers.size() != 1 ? "s" : "");
+    }
 }

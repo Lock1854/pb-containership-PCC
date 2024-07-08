@@ -12,13 +12,15 @@ public class Pile {
     int hauteur;
     ArrayList<Position> posList;
     Bloc bloc;
+    boolean isUnder;
 
-    public Pile(int nbPos, Bloc bloc){
+    public Pile(int nbPos, Bloc bloc, boolean isUnder){
         this.hauteur = nbPos;
         this.bloc = bloc;
         this.posList = new ArrayList<>();
+        this.isUnder = isUnder;
         for (int i = 0; i < nbPos; i++) {
-            Position pos = new Position(i, numberPos, false, new IntVar[nbStop], this);
+            Position pos = new Position(i, numberPos, false, new IntVar[nbStop], this, isUnder);
             this.posList.add(pos);
             positions.add(pos);
             numberPos++;

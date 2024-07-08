@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.containershipPb.Data.containers;
+import static org.containershipPb.Ship.halfBlocs;
 import static org.containershipPb.Ship.positions;
 import static org.containershipPb.PbSolver.*;
 
@@ -80,11 +81,14 @@ public class CSP {
             }
             if (testSymmetry) {
                 for (Type type : data.types) {
-                    if (i > type.load && i <= type.unload) {
+                    if (i == type.load + 1) {
                         for (int c = 0; c < type.containers.size() - 1; c++) {
                             breakSymmetryInStack(type.containers.get(c), type.containers.get(c + 1), i);
                         }
                     }
+                }
+                for (ArrayList<Position> halfbloc : halfBlocs){
+                    if (i > 0) breakSymmetryInBloc(halfbloc, i);
                 }
             }
         }
@@ -140,7 +144,7 @@ public class CSP {
                         tupleGen.getMovePosTuple(pos, false)
                 ).post();
             }
-            if (!pos.isHatch && pos.isUnder()) {
+            if (!pos.isHatch && pos.isUnder) {
                 model.table(
                         new IntVar[]{move[pos.number][i], move[pos.pile.bloc.hatch.number][i]},
                         tupleGen.getMovePanTuple()
@@ -213,7 +217,7 @@ public class CSP {
                 }
             }
             // propagation bloquage
-            if (pos.isUnder()) {
+            if (pos.isUnder) {
                 model.ifThen(
                         model.arithm(move[pos.number][i], "!=", 0),
                         model.arithm(move[pos.pile.bloc.hatch.number][i], "=", 2)
@@ -257,8 +261,21 @@ public class CSP {
     }
 
     private void breakSymmetryInStack(Container cont1, Container cont2, int i){
-        System.out.printf("étape : %d\n cont1 : %s\n cont2 : %s\n", i, cont1.toString(), cont2);
         model.arithm(cont1.positions[i], "<", cont2.positions[i]).post();
+    }
+
+    private void breakSymmetryInBloc(ArrayList<Position> halfbloc, int i){
+        for (int j = 1; j < halfbloc.size(); j++) {
+            Position pos = halfbloc.get(j);
+            Position previousPos = halfbloc.get(j-1);
+            model.ifThen(
+                    model.and(
+                            model.arithm(pos.containers[i], "!=", -pos.number),
+                            model.arithm(pos.containers[i-1], "=", -pos.number)
+                    ),
+                    model.arithm(previousPos.containers[i], "!=", -previousPos.number)
+            );
+        }
     }
 
     private void initialiseContVar(){
@@ -357,7 +374,7 @@ public class CSP {
                     if ( i == nbStop - 1 || solution.getIntVal(printOrderedPos.get(compt).containers[i+1]) <= 0) {
                         System.out.printf("%4s", ".");
                     } else {
-                        System.out.printf("%4d", solution.getIntVal(printOrderedPos.get(compt).containers[i+1]));
+                        System.out.printf("%4d", containers.get(solution.getIntVal(printOrderedPos.get(compt).containers[i+1])-1).type.num);
                     }
                     compt++;
                 }
@@ -403,9 +420,13 @@ public class CSP {
         for (int l = limPos - 1; l >= 0; l--) {
             posCompteur = b * nbBloc * (nbPileAbove * nbPosAbove + nbPileUnder * nbPosUnder) + l;
             if (!under) posCompteur += (nbPileUnder * nbPosUnder);
-            for (int p = 0; p < limPile * nbBloc; p++) {
-                pos.add(positions.get(posCompteur));
-                posCompteur += limPos;
+            for (int bl = 0; bl < nbBloc; bl++) {
+                for (int p = 0; p < limPile; p++) {
+                    pos.add(positions.get(posCompteur));
+                    posCompteur += limPos;
+                }
+                if (!under) posCompteur += nbPileUnder * nbPosUnder;
+                else posCompteur += nbPileAbove * nbPosAbove;
             }
         }
         return pos;

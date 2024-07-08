@@ -9,15 +9,13 @@ public class TupleGenerator {
     public TupleGenerator(){
     }
 
-    static int compteur = 8;
-    static boolean show = true;
+    static boolean show = false;
     public Tuples getContPosEquiv(Container cont, Position pos, int i){
         Tuples t = new Tuples(true);
         for (int p = cont.positions[i].getLB(); p <= cont.positions[i].getUB(); p++) {
             for (int c : data.onboardContsNo(i)) {
                 if ((c != cont.number && p != pos.number) || (c == cont.number && p == pos.number)){
                     t.add(c,p);
-                    if (compteur == 7) System.out.printf("%d, %d\n", c, p);
                 }
             }
             for (int q = cont.positions[i].getLB(); q <= cont.positions[i].getUB(); q++) {
@@ -32,7 +30,6 @@ public class TupleGenerator {
             );
             show = false;
         }
-        compteur++;
         return t;
     }
 

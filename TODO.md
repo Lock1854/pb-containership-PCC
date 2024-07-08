@@ -1,8 +1,7 @@
-- Ajouter constraintes pour briser symmétries
-  - symétrie des containers dans la pile
-  - symétries des piles
+- [ ] Ajouter constraintes pour briser symmétries des piles
 - Faire tuples pour la contrainte `forbidRestow`
-- Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
+- [ ] Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
 - Continuer à rédiger le rapport
+  - Rédiger la contrainte breakSymmetryInStack
   - Organiser la partie *Implémentation*
   - Rédiger la partie *Résultats et Analyse* (exemple, données du code etc...)
