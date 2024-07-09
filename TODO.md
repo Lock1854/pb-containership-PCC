@@ -1,16 +1,13 @@
-- [ ] Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
-- [ ] Ajouter contrainte pour casser la symétrie entre les blocs dans une baie
+- Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
 - Réessayer quand on aura implémenté d'autre aides :
   - seed = 1499847454 
   - nbCont = 16, nbStop = 12, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 3, nbPosUnder = 2
   - numberTypes = 5, minTypeLength = 3
-  - temps de résolutions actuel SANS restow AVEC table : 15,2s
-  - temps de résolutions 08/07 SANS restow AVEC table : 75,5s
-  - temps de résolutions 08/07 SANS restow SANS table : 139,7s
-  - temps de résolutions 08/07 AVEC restow AVEC table : 150+s
-  - temps de résolutions 08/07 AVEC restow SANS table : 150+s
+  - temps de résolution actuel SANS restow AVEC table : 2,3s
+  - temps de résolution 08/07 SANS restow AVEC table : 75,5s
+  - temps de résolution 08/07 SANS restow SANS table : 139,7s
+  - temps de résolution 08/07 AVEC restow AVEC table : 150+s
+  - temps de résolution 08/07 AVEC restow SANS table : 150+s
 - Continuer à rédiger le rapport
-  - [ ] Rédiger la contrainte breakSymmetryInStack
-  - [ ] Rédiger la contrainte breakSymmetryInBloc
-  - [ ] Organiser la partie *Implémentation*
+  - Corriger les nombre de contraintes et variables en prenant en compte pos(c,i) à nouveau
   - Rédiger la partie *Résultats et Analyse* (exemple, données du code etc...)

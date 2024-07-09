@@ -13,9 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.containershipPb.Data.containers;
-import static org.containershipPb.Ship.halfBlocs;
-import static org.containershipPb.Ship.positions;
 import static org.containershipPb.PbSolver.*;
+import static org.containershipPb.Ship.*;
 
 public class CSP {
     IntVar[][] move;
@@ -87,8 +86,20 @@ public class CSP {
                         }
                     }
                 }
-                for (ArrayList<Position> halfbloc : halfBlocs){
-                    if (i > 0) breakSymmetryInBloc(halfbloc, i);
+                if (nbPileUnder > 1 || nbPileAbove > 1) {
+                    for (ArrayList<Position> symPos : symPosStack) {
+                        if (i > 0) breakBigSymmetry(symPos, i);
+                    }
+                }
+                if (nbBloc > 1){
+                    for (ArrayList<Position> symPos : symPosBloc) {
+                        if (i > 0) breakBigSymmetry(symPos, i);
+                    }
+                }
+                if (nbBay > 1){
+                    for (ArrayList<Position> symPos : symPosBay) {
+                        if (i > 0) breakBigSymmetry(symPos, i);
+                    }
                 }
             }
         }
@@ -265,10 +276,10 @@ public class CSP {
         model.arithm(cont1.positions[i], "<", cont2.positions[i]).post();
     }
 
-    private void breakSymmetryInBloc(ArrayList<Position> halfbloc, int i){
-        for (int j = 1; j < halfbloc.size(); j++) {
-            Position pos = halfbloc.get(j);
-            Position previousPos = halfbloc.get(j-1);
+    private void breakBigSymmetry(ArrayList<Position> symPos, int i){
+        for (int j = 1; j < symPos.size(); j++) {
+            Position pos = symPos.get(j);
+            Position previousPos = symPos.get(j-1);
             if (table) model.table(new IntVar[]{pos.containers[i], pos.containers[i-1], previousPos.containers[i]}, tupleGen.getBlocSymmetryTuples(pos, previousPos)).post();
             else {
                 model.ifThen(

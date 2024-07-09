@@ -15,6 +15,7 @@ public class Bloc {
     ArrayList<ArrayList<Position>> bottomPosUnder, bottomPosAbove;
 
     public Bloc(int nbPileAbove, int nbPilesUnder, int nbPosAbove, int nbPosUnder, Bay bay){
+        posInBloc = 0;
         this.nbPilesAbove = nbPileAbove;
         this.nbPilesUnder = nbPilesUnder;
         this.bay = bay;

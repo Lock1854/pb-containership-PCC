@@ -2,6 +2,10 @@ package org.containershipPb;
 
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.containershipPb.PbSolver.nbBay;
+import static org.containershipPb.PbSolver.nbBloc;
+import static org.containershipPb.Ship.*;
+
 public class Position {
     Boolean isHatch;
     Integer level;
@@ -22,6 +26,14 @@ public class Position {
         this.support = support();
         if (isUnder) pile.bloc.bottomPosUnder.get(level).add(this);
         else pile.bloc.bottomPosAbove.get(level).add(this);
+        if (nbBloc > 1 && !isUnder) {
+            symPosBloc.get(posInBloc).add(this);
+            posInBloc++;
+        }
+        if (nbBay > 1 && !isUnder) {
+            symPosBay.get(posInBay).add(this);
+            posInBay++;
+        }
     }
 
     public Position(Integer level, int number, boolean isHatch, IntVar[] containers, Bloc bloc){

@@ -11,7 +11,7 @@ public class Data {
     ArrayList<ArrayList<Container>> onboardConts;
     int maxTries = 10;
     static Random random = new Random();
-    int numberTypes = 6, minTypeLength = 3;
+    int numberTypes = 4, minTypeLength = 3;
 
     public Data(){
         onboardConts = new ArrayList<>(nbStop);
@@ -115,7 +115,7 @@ public class Data {
         return l;
     }
 
-    static int seed = -1;
+    static int seed = 1575406768;
     private ArrayList<Type> generateTypes(){
         ArrayList<Type> l = new ArrayList<>(numberTypes);
         if (seed == -1) seed = Math.abs(random.nextInt());
