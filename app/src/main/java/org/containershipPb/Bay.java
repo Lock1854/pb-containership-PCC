@@ -14,8 +14,8 @@ public class Bay {
         for (int i = 0; i < nbBloc; i++) {
             Bloc bloc = new Bloc(nbPileAbove, nbPilesUnder, nbPosAbove, nbPosUnder, this);
             this.blocList.add(bloc);
-            halfBlocs.add(bloc.bottomPosUnder);
-            halfBlocs.add(bloc.bottomPosAbove);
+            halfBlocs.addAll(bloc.bottomPosUnder);
+            halfBlocs.addAll(bloc.bottomPosAbove);
         }
     }
 }

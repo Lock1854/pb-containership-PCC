@@ -20,10 +20,8 @@ public class Position {
         this.pile = pile;
         this.isUnder = isUnder;
         this.support = support();
-        if (level == 0) {
-            if (isUnder) pile.bloc.bottomPosUnder.add(this);
-            else pile.bloc.bottomPosAbove.add(this);
-        }
+        if (isUnder) pile.bloc.bottomPosUnder.get(level).add(this);
+        else pile.bloc.bottomPosAbove.get(level).add(this);
     }
 
     public Position(Integer level, int number, boolean isHatch, IntVar[] containers, Bloc bloc){

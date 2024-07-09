@@ -1,4 +1,5 @@
 - [ ] Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
+- [ ] Ajouter contrainte pour casser la symétrie entre les blocs dans une baie
 - Réessayer quand on aura implémenté d'autre aides :
   - seed = 1499847454 
   - nbCont = 16, nbStop = 12, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 3, nbPosUnder = 2
