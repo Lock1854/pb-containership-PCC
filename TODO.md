@@ -1,14 +1,15 @@
-- Faire tuples pour la contrainte `forbidRestow`
-- Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
+- [ ] Construire un petit problème intéressant mais résoluble par le CSP pour intégrer dans le rapport
 - Réessayer quand on aura implémenté d'autre aides :
   - seed = 1499847454 
   - nbCont = 16, nbStop = 12, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 3, nbPosUnder = 2
-  - temps de résolutions actuel SANS restow AVEC table : 75,5s
-  - temps de résolutions actuel SANS restow SANS table : 139,7s
-  - temps de résolutions actuel AVEC restow AVEC table : 150+s
-  - temps de résolutions actuel AVEC restow SANS table : 150+s
+  - numberTypes = 5, minTypeLength = 3
+  - temps de résolutions actuel SANS restow AVEC table : 15,2s
+  - temps de résolutions 08/07 SANS restow AVEC table : 75,5s
+  - temps de résolutions 08/07 SANS restow SANS table : 139,7s
+  - temps de résolutions 08/07 AVEC restow AVEC table : 150+s
+  - temps de résolutions 08/07 AVEC restow SANS table : 150+s
 - Continuer à rédiger le rapport
-  - Rédiger la contrainte breakSymmetryInStack
-  - Rédiger la contrainte breakSymmetryInBloc
-  - Organiser la partie *Implémentation*
+  - [ ] Rédiger la contrainte breakSymmetryInStack
+  - [ ] Rédiger la contrainte breakSymmetryInBloc
+  - [ ] Organiser la partie *Implémentation*
   - Rédiger la partie *Résultats et Analyse* (exemple, données du code etc...)

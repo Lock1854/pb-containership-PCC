@@ -70,7 +70,7 @@ public class CSP {
             for (Position pos : positions) {
                 ensureStack(pos, i);
                 computeMove(pos, i);
-                if (!restowAllowed) forbidRestow(pos, i);
+                if (!restowAllowed && i < nbStop - 1 && !pos.isHatch) forbidRestow(pos, i);
                 if (testSymmetry && !pos.isHatch) {
                     for (Container cont : containers) {
                         if (i > cont.load && i <= cont.unload) {
@@ -95,7 +95,7 @@ public class CSP {
     }
 
     private void makePosContEquiv(Container cont, Position pos, int i){
-        if (table) model.table(pos.containers[i], cont.positions[i], tupleGen.getContPosEquiv(cont, pos, i)).post();
+        if (table) model.table(pos.containers[i], cont.positions[i], tupleGen.getContPosEquivTuples(cont, pos, i)).post();
         else{
             model.ifOnlyIf(
                     model.arithm(cont.positions[i], "=", pos.number),
@@ -116,7 +116,7 @@ public class CSP {
     private void ensureStack(Position pos, int i){
         if (pos.support != null && !pos.support.isHatch) {
             if (table){
-                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getStackTuple(pos)).post();
+                model.table(pos.containers[i], pos.support.containers[i], tupleGen.getStackTuples(pos)).post();
             } else {
                 model.ifThen(
                         model.arithm(pos.containers[i], "!=", - pos.number),
@@ -131,23 +131,23 @@ public class CSP {
             if (i == nbStop - 1) {
                 model.table(
                         new IntVar[]{pos.containers[i], move[pos.number][i]},
-                        tupleGen.getMovePosTuple(pos, true)
+                        tupleGen.getMovePosTuples(pos, true)
                 ).post();
             } else if (pos.support == null){
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], model.intVar(0)},
-                        tupleGen.getMovePosTuple(pos, false)
+                        tupleGen.getMovePosTuples(pos, false)
                 ).post();
             } else {
                 model.table(
                         new IntVar[]{pos.containers[i], pos.containers[i + 1], move[pos.number][i], move[pos.support.number][i]},
-                        tupleGen.getMovePosTuple(pos, false)
+                        tupleGen.getMovePosTuples(pos, false)
                 ).post();
             }
             if (!pos.isHatch && pos.isUnder) {
                 model.table(
                         new IntVar[]{move[pos.number][i], move[pos.pile.bloc.hatch.number][i]},
-                        tupleGen.getMovePanTuple()
+                        tupleGen.getMovePanTuples()
                 ).post();
             }
         }
@@ -238,7 +238,8 @@ public class CSP {
     }
 
     private void forbidRestow(Position pos, int i) {
-        if (i < nbStop - 1 && !pos.isHatch) {
+        if (table) model.table(new IntVar[]{pos.containers[i], pos.containers[i+1], move[pos.number][i]}, tupleGen.getNoRestowTuples(pos, i)).post();
+        else {
             model.ifThen(
                     model.and(
                             model.arithm(pos.containers[i], "!=", pos.containers[i + 1]),
@@ -268,13 +269,16 @@ public class CSP {
         for (int j = 1; j < halfbloc.size(); j++) {
             Position pos = halfbloc.get(j);
             Position previousPos = halfbloc.get(j-1);
-            model.ifThen(
-                    model.and(
-                            model.arithm(pos.containers[i], "!=", -pos.number),
-                            model.arithm(pos.containers[i-1], "=", -pos.number)
-                    ),
-                    model.arithm(previousPos.containers[i], "!=", -previousPos.number)
-            );
+            if (table) model.table(new IntVar[]{pos.containers[i], pos.containers[i-1], previousPos.containers[i]}, tupleGen.getBlocSymmetryTuples(pos, previousPos)).post();
+            else {
+                model.ifThen(
+                        model.and(
+                                model.arithm(pos.containers[i], "!=", -pos.number),
+                                model.arithm(pos.containers[i - 1], "=", -pos.number)
+                        ),
+                        model.arithm(previousPos.containers[i], "!=", -previousPos.number)
+                );
+            }
         }
     }
 
