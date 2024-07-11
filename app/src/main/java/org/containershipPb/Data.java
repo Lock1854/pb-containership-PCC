@@ -11,28 +11,43 @@ public class Data {
     ArrayList<ArrayList<Container>> onboardConts;
     int maxTries = 10;
     static Random random = new Random();
-    int numberTypes = 4, minTypeLength = 3;
+    int numberTypes = 9, minTypeLength = 3;
+    Boolean generateAtRandom = false;
+    static int seed = 1512066322;
 
     public Data(){
+        containers = new ArrayList<>();
         onboardConts = new ArrayList<>(nbStop);
-        int step;
         if (seed != -1) maxTries = 1;
+        boolean finish;
         do {
-            this.types = generateTypes();
-            containers = buildConts();
+            finish = true;
+            if (seed == -1) seed = Math.abs(random.nextInt());
+            random.setSeed(seed);
+            this.types = generateAtRandom? generateTypesRandom() : generateTypesManually();
+            buildConts();
             onboardConts.clear();
-            step = 0;
-            while (step < nbStop) {
-                ArrayList<Container> list = onboardConts(step);
-                if (list.size() > ship.nbPos) break;
-                onboardConts.add(list);
-                step++;
+            for (Type type : types){
+                if (type.containers.isEmpty()){
+                    finish = false;
+                    break;
+                }
             }
-            if (step < nbStop) {
+            if (finish) {
+                for (int i = 0; i < nbStop; i++) {
+                    ArrayList<Container> list = onboardConts(i);
+                    if (list.size() > ship.nbPos) {
+                        finish = false;
+                        break;
+                    }
+                    onboardConts.add(list);
+                }
+            }
+            if (!finish) {
                 if (--maxTries <= 0) System.exit(0);
                 seed = -1;
             }
-        } while (step < nbStop);
+        } while (!finish);
     }
 
     private ArrayList<Container> onboardConts(int i){
@@ -104,26 +119,35 @@ public class Data {
         return n;
     }
 
-    private ArrayList<Container> buildConts(){
-        ArrayList<Container> l = new ArrayList<>(nbCont);
+    private void buildConts(){
+        System.out.printf("seed = %d\n", seed);
         for (int c = 0; c <nbCont; c++) {
             Type type = types.get(random.nextInt(numberTypes));
             Container cont = new Container(type, c+1);
-            l.add(cont);
+            containers.add(cont);
             type.containers.add(cont);
+        }
+    }
+
+    private ArrayList<Type> generateTypesRandom(){
+        ArrayList<Type> l = new ArrayList<>(numberTypes);
+        for (int j = 0; j < numberTypes; j++) {
+            l.add(generateValidType());
         }
         return l;
     }
 
-    static int seed = 1575406768;
-    private ArrayList<Type> generateTypes(){
+    private ArrayList<Type> generateTypesManually(){
         ArrayList<Type> l = new ArrayList<>(numberTypes);
-        if (seed == -1) seed = Math.abs(random.nextInt());
-        System.out.printf("seed = %d\n", seed);
-        random.setSeed(seed);
-        for (int j = 0; j < numberTypes; j++) {
-            l.add(generateValidType());
-        }
+        l.add(new Type(0,3,0));
+        l.add(new Type(1,4,1));
+        l.add(new Type(1,2,2));
+        l.add(new Type(2,8,3));
+        l.add(new Type(3,7,4));
+        l.add(new Type(4,6,5));
+        l.add(new Type(6,10,6));
+        l.add(new Type(7,9,7));
+        l.add(new Type(8,10,8));
         return l;
     }
 

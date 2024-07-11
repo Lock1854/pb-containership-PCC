@@ -64,6 +64,7 @@ public class CSP {
         if (restowAllowed) computeRestowTot();
         for (int i = 0; i < nbStop; i++) {
             forceDifferentPositions(i);
+            forceDifferentContent(i);
             ensureAllTransported(i);
             if (restowAllowed) computeRestow(i);
             for (Position pos : positions) {
@@ -117,6 +118,10 @@ public class CSP {
 
     private void forceDifferentPositions(int i){
         model.allDifferent(getAllContent(i)).post();
+    }
+
+    private void forceDifferentContent(int i){
+        if (getAllPosVar(i).length != 0) model.allDifferent(getAllPosVar(i)).post();
     }
 
     private void ensureAllTransported(int i){
@@ -328,6 +333,16 @@ public class CSP {
         int compteur = 0;
         for (Position pos : positions) {
             vars[compteur] = pos.containers[i];
+            compteur++;
+        }
+        return vars;
+    }
+
+    private IntVar[] getAllPosVar(int i){
+        IntVar[] vars = new IntVar[data.onboardConts.get(i).size()];
+        int compteur = 0;
+        for (Container cont : data.onboardConts.get(i)) {
+            vars[compteur] = cont.positions[i];
             compteur++;
         }
         return vars;

@@ -1,0 +1,8 @@
+- Exemple 1 :
+  - seed = 393623312 
+  - nbCont = 20, nbStop = 11, nbBay = 1, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 2, nbPosUnder = 2
+  - temps de résolution actuel SANS restow AVEC table : 9.8s
+- Exemple 2 :
+  - seed : 1512066322
+  - nbCont = 33, nbStop = 11, nbBay = 2, nbBloc = 2, nbPileAbove = 2, nbPileUnder = 2, nbPosAbove = 2, nbPosUnder = 2
+  - temps de résolution actuel SANS restow AVEC table : 25,0s

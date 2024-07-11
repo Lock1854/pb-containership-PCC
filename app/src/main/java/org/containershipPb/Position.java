@@ -24,13 +24,15 @@ public class Position {
         this.pile = pile;
         this.isUnder = isUnder;
         this.support = support();
-        if (isUnder) pile.bloc.bottomPosUnder.get(level).add(this);
-        else pile.bloc.bottomPosAbove.get(level).add(this);
-        if (nbBloc > 1 && !isUnder) {
+        if (level == 0) {
+            if (isUnder) pile.bloc.bottomPosUnder.get(level).add(this);
+            else pile.bloc.bottomPosAbove.get(level).add(this);
+        }
+        if (nbBloc > 1 && !isUnder && posInBloc == 0) {
             symPosBloc.get(posInBloc).add(this);
             posInBloc++;
         }
-        if (nbBay > 1 && !isUnder) {
+        if (nbBay > 1 && !isUnder && posInBay == 0) {
             symPosBay.get(posInBay).add(this);
             posInBay++;
         }
